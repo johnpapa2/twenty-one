@@ -37,8 +37,8 @@ class Test_Card(unittest.TestCase):
 
 
 class ConcreteCard(Card):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, suit, rank):
+        super().__init__(suit, rank)
 
     @property
     def value(self):
