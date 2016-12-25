@@ -10,8 +10,8 @@ from .card import Card
 
 class BjCard(Card):
 
-    def __init__(self, *args, **kwarg):
-        super().__init__(*args, **kwarg)
+    def __init__(self, suit, rank):
+        super().__init__(suit, rank)
 
     @property
     def value(self):
