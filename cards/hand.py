@@ -22,3 +22,11 @@ class Hand:
     def add_card(self, card):
         """ Add a card to the hand """
         self._cards.append(card)
+
+    @property
+    def value(self):
+        """ Return the value of the hand """
+        value = 0
+        for card in self._cards:
+            value += card.value
+        return value
