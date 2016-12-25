@@ -16,7 +16,8 @@ class Card(metaclass=ABCMeta):
         self._value = None
 
     def __str__(self):
-        return f"{self._rank} of {self._suit}"
+        # return f"{self.rank} of {self.suit}"
+        return "{0} of {1}".format(self.rank, self.suit)
 
     @property
     def rank(self):
