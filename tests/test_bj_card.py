@@ -1,5 +1,5 @@
 """
-Created on Dec 04, 2016
+Created on Dec 24, 2016
 
 @author: john papa
 
@@ -9,7 +9,6 @@ This work is licensed under the MIT License.
 import unittest
 
 from cards.bjcard import BjCard
-from unittest.mock import patch, PropertyMock, MagicMock
 
 
 class Test_BJ_Card(unittest.TestCase):

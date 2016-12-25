@@ -9,7 +9,6 @@ This work is licensed under the MIT License.
 import unittest
 
 from cards.card import Card
-from unittest.mock import patch, PropertyMock, MagicMock
 
 
 class Test_Card(unittest.TestCase):
