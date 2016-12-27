@@ -17,14 +17,14 @@ from players.player import Player
 
 class Blackjack:
 
-    def __init__(self, player_names):
+    def __init__(self, player_names, console_log_level=None, file_log_level=None):
         """ Initialize """
         self._deck = Deck()
         self._dealer = Player('Mora', 'Dealer')
         self._players = [Player(name, 'Player') for name in player_names]
         self._discard_pile = Player('Pile', 'Discard')
         self._log_directory = "./logs"
-        self._init_logger()
+        self._init_logger(console_log_level, file_log_level)
         self._logger = logging.getLogger('bj')
 
     @property
@@ -64,9 +64,10 @@ class Blackjack:
                 player.receives(self.deck.deal_card())
 
             self.dealer.receives(self.deck.deal_card())
+        self._logger
 
     def dealers_turn(self):
-        result = self.dealer.move(self.deck)
+        result = self.dealer.move(self.deck, self.dealer.hand)
         if result == 'bust':
             self.discard_hand(self.dealer)
 
@@ -75,7 +76,7 @@ class Blackjack:
             self.discard_pile.receives(card)
         player.init_hand()
 
-    def _init_logger(self):
+    def _init_logger(self, console_log_level=None, file_log_level=None):
         """ Initialize the log file and logger. """
         # Create log directory if it doesn't already exist.
         if not os.path.exists(self._log_directory):
@@ -83,18 +84,35 @@ class Blackjack:
 
         log_filename = f"{self._log_directory}/bj_{uuid.uuid1()}.log"
 
+        file_logging = logging.DEBUG
+        if file_log_level == 'info':
+            file_logging = logging.INFO
+        elif file_log_level == 'warning':
+            file_logging = logging.WARNING
+        elif file_log_level == 'error':
+            file_logging = logging.ERROR
+
         # Add the date to the log file names
         logging.basicConfig(
             filename=log_filename,
             filemode='w',
-            level=logging.DEBUG,
+            level=file_logging,
             format='%(asctime)s|%(levelname)-5s| %(message)s',
             datefmt='%Y-%m-%d %I:%M:%S %p')
-        # define a Handler which writes WARNING messages or higher to the sys.stderr
+
+        console_logging = logging.DEBUG
+        if console_log_level == 'info':
+            console_logging = logging.INFO
+        elif console_log_level == 'warning':
+            console_logging = logging.WARNING
+        elif console_log_level == 'error':
+            console_logging = logging.ERROR
+
         console = logging.StreamHandler()
-        console.setLevel(logging.INFO)
+        console.setLevel(console_logging)
         # set a format which is simpler for console use
-        formatter = logging.Formatter('%(levelname)-5s| %(message)s')
+        #formatter = logging.Formatter('%(levelname)-5s| %(message)s')
+        formatter = logging.Formatter('%(message)s')
         console.setFormatter(formatter)
         # add the handler to the root logger
         logging.getLogger('').addHandler(console)
@@ -107,8 +125,8 @@ class Blackjack:
             self.play_round()
         for player in self.players:
             self._logger.info("\n\n***** Deck summary *****")
-            self._logger.info(f"{player.label} won {player.wins} hands!")
-            self._logger.info(f"{player.label} lost {player.losses} hands!")
+            self._logger.info(f"{player} won {player.wins} hands!")
+            self._logger.info(f"{player} lost {player.losses} hands!")
 
     def play_round(self):
         self.deal_round()
@@ -127,7 +145,7 @@ class Blackjack:
     def players_turn(self):
         deck = self.deck
         for player in self.players:
-            result = player.move(deck)
+            result = player.move(deck, self.dealer.hand)
             if result == 'bust':
                 self.discard_hand(player)
 
@@ -135,10 +153,10 @@ class Blackjack:
         dealer = self.dealer
         for player in reversed(self.players):
             if player.total > dealer.total:
-                self._logger.info(f"*** Player {player.name} wins! ***")
+                self._logger.info(f"*** {player} wins! ***")
                 player.wins += 1
             elif player.total == dealer.total:
-                self._logger.info(f"*** Player {player.name} pushes! ***")
+                self._logger.info(f"*** {player} pushes! ***")
             else:
-                self._logger.info(f"*** Player {player.name} loses")
+                self._logger.info(f"*** {player} loses")
                 player.losses += 1
