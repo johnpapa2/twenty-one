@@ -22,17 +22,16 @@ class Player():
         self._losses = 0
         self._logger = logging.getLogger('bj')
         if position == 'Dealer':
-            self._logger.info(f"{self.label} taps into table")
+            self._logger.info(f"{self} taps into table")
         elif position == 'Player':
-            self._logger.info(f"{self.label} sits at table")
+            self._logger.info(f"{self} sits at table")
+
+    def __str__(self):
+        return f"{self.position} {self.name}"
 
     @property
     def hand(self):
         return self._hand
-
-    @property
-    def label(self):
-        return f"{self.position} {self.name}"
 
     @property
     def losses(self):
@@ -52,7 +51,7 @@ class Player():
 
     @property
     def total(self):
-        self._logger.debug(f"{self.label} adds up hand")
+        self._logger.debug(f"{self} adds up hand")
         total = self.hand.value
         return total
 
@@ -64,47 +63,58 @@ class Player():
     def wins(self, value):
         self._wins = value
 
+    def display_hand(self):
+        ranks = [card.rank for card in self.hand]
+        hand = '] ['.join(ranks)
+        self._logger.info(f"{self} has [{hand}]")
+
     def doubles(self, card):
-        self._logger.info(f"{self.label} doubles")
+        self._logger.info(f"{self} doubles")
         self.receives(card)
-        if self.hand.value > 21:
-            self._logger.info(f"{self.label} Busted!")
 
     def hits(self, card):
-        self._logger.info(f"{self.label} hits")
+        self._logger.info(f"{self} hits")
         self.receives(card)
-        if self.hand.value > 21:
-            self._logger.info(f"{self.label} Busted!")
 
     def init_hand(self):
         self._hand = Hand()
 
-    def move(self, deck):
+    def move(self, deck, dealers_hand):
         result = None
         move = None
+
         if self.position == 'Player':
+            self._logger.info(f"Dealer shows a [{dealers_hand[0].rank}]")
+            self.display_hand()
             if self.total != 21:
                 while move != 'stand':
                     move = click.prompt(f"Hand total {self.total}, Your Move", default='stand')
                     if move == 'hit':
                         self.hits(deck.deal_card())
+                        self.display_hand()
                     elif move == 'double':
                         self.doubles(deck.deal_card())
+                        self.display_hand()
                         break
                     if self.total > 21:
                         result = 'bust'
+                        self._logger.info(f"{self} Busted!")
                         break
+                if move == 'stand':
+                    self._logger.info(f"{self} stands!")
         else:
+            self.display_hand()
             while self.total < 17:
                 self.hits(deck.deal_card())
+                self.display_hand()
                 if self.total > 21:
                     result = 'bust'
                     break
 
-        self._logger.info(f"{self.label}'s hand value is {self.total}")
+        self._logger.info(f"{self}'s hand value is {self.total}")
         return result
 
     def receives(self, card):
         self.hand.add_card(card)
         if self.position != 'Discard':
-            self._logger.debug(f"{self.label} gets {card}")
+            self._logger.debug(f"{self} gets {card}")
