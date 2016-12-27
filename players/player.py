@@ -7,6 +7,7 @@ Copyright 2016 John Papa.  All rights reserved.
 This work is licensed under the MIT License.
 """
 import click
+import logging
 
 from cards.hand import Hand
 
@@ -19,10 +20,11 @@ class Player():
         self._hand = Hand()
         self._wins = 0
         self._losses = 0
+        self._logger = logging.getLogger('bj')
         if position == 'Dealer':
-            print(f"{self.label} taps into table")
+            self._logger.info(f"{self.label} taps into table")
         elif position == 'Player':
-            print(f"{self.label} sits at table")
+            self._logger.info(f"{self.label} sits at table")
 
     @property
     def hand(self):
@@ -34,7 +36,6 @@ class Player():
 
     @property
     def losses(self):
-        #print(f"{self.label} lost {self._losses} hands!")
         return self._losses
 
     @losses.setter
@@ -51,13 +52,12 @@ class Player():
 
     @property
     def total(self):
-        #print(f"{self.label} adds up hand")
+        self._logger.debug(f"{self.label} adds up hand")
         total = self.hand.value
         return total
 
     @property
     def wins(self):
-        #print(f"{self.label} won {self._wins} hands!")
         return self._wins
 
     @wins.setter
@@ -65,16 +65,16 @@ class Player():
         self._wins = value
 
     def doubles(self, card):
-        print(f"{self.label} doubles")
+        self._logger.info(f"{self.label} doubles")
         self.receives(card)
         if self.hand.value > 21:
-            print(f"{self.label} Busted!")
+            self._logger.info(f"{self.label} Busted!")
 
     def hits(self, card):
-        print(f"{self.label} hits")
+        self._logger.info(f"{self.label} hits")
         self.receives(card)
         if self.hand.value > 21:
-            print(f"{self.label} Busted!")
+            self._logger.info(f"{self.label} Busted!")
 
     def init_hand(self):
         self._hand = Hand()
@@ -101,10 +101,10 @@ class Player():
                     result = 'bust'
                     break
 
-        print(f"{self.label}'s hand value is {self.total}")
+        self._logger.info(f"{self.label}'s hand value is {self.total}")
         return result
 
     def receives(self, card):
         self.hand.add_card(card)
-        #if self.position != 'Discard':
-        #    print(f"{self.label} gets {card}")
+        if self.position != 'Discard':
+            self._logger.debug(f"{self.label} gets {card}")
