@@ -18,6 +18,7 @@ class Player():
         self._name = name
         self._position = position
         self._hand = Hand()
+        self._busted = False
         self._wins = 0
         self._losses = 0
         self._logger = logging.getLogger('bj')
@@ -28,6 +29,14 @@ class Player():
 
     def __str__(self):
         return f"{self.position} {self.name}"
+
+    @property
+    def busted(self):
+        return self._busted
+
+    @busted.setter
+    def busted(self, value):
+        self._busted = value
 
     @property
     def hand(self):
@@ -80,7 +89,6 @@ class Player():
         self._hand = Hand()
 
     def move(self, deck, dealers_hand):
-        result = None
         move = None
 
         if self.position == 'Player':
@@ -97,7 +105,7 @@ class Player():
                         self.display_hand()
                         break
                     if self.total > 21:
-                        result = 'bust'
+                        self.busted = True
                         self._logger.info(f"{self} Busted!")
                         break
                 if move == 'stand':
@@ -108,11 +116,10 @@ class Player():
                 self.hits(deck.deal_card())
                 self.display_hand()
                 if self.total > 21:
-                    result = 'bust'
+                    self.busted = True
                     break
 
         self._logger.info(f"{self}'s hand value is {self.total}")
-        return result
 
     def receives(self, card):
         self.hand.add_card(card)
