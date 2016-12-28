@@ -6,6 +6,7 @@ Created on Dec 04, 2016
 Copyright 2016 John Papa.  All rights reserved.
 This work is licensed under the MIT License.
 """
+import logging
 import random
 
 from .bjcard import BjCard
@@ -19,6 +20,8 @@ class Deck:
         self._suits = ['spades', 'diamonds', 'clubs', 'hearts']
         self._cards = [BjCard(suit, rank) for suit in self._suits for rank in self._ranks if suit == 'spades' or suit == 'diamonds']
         self._cards += [BjCard(suit, rank) for suit in self._suits for rank in reversed(self._ranks) if suit == 'clubs' or suit == 'hearts']
+        self._logger = logging.getLogger('bj')
+        self._logger.info("New deck of cards opened and spread")
 
     def __getitem__(self, position):
         return self._cards[position]
@@ -29,8 +32,12 @@ class Deck:
 
     def deal_card(self):
         """ Remove the top card from the deck and return it """
-        return self._cards.pop(0)
+        card = self._cards.pop(0)
+        self._logger.debug(f"  Dealing a {card}")
+        return card
 
     def shuffle(self):
         """ Shuffle the deck """
         random.shuffle(self._cards)
+        self._logger.info("Now's a good time to smoke a cig while I shuffle")
+
