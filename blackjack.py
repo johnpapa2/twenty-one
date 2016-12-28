@@ -44,16 +44,20 @@ class Blackjack:
         return self._players
 
     def burn_a_card(self):
+        """ Burn the top card in the deck """
         card = self.deck.deal_card()
         self._logger.info(f"Burn the {card}")
         self.discard_pile.receives(card)
 
     def check_for_blackjack(self):
+        """ Check for dealer blackjack if dealer is showing a Ten value card or an Ace. """
         got_blackjack = False
-        self._logger.info("Check for blackjack")
-        if self.dealer.total == 21:
-            self._logger.info("***** TWENTY-ONE! *****")
-            got_blackjack = True
+        dealer = self.dealer
+        if any([dealer.hand[0].value in [1, 10]]):
+            self._logger.info("Check for blackjack")
+            if self.dealer.total == 21:
+                self._logger.info("***** DEALER HAS TWENTY-ONE! BLACKJACK! *****")
+                got_blackjack = True
         return got_blackjack
 
     def deal_round(self):
@@ -67,14 +71,74 @@ class Blackjack:
         self._logger
 
     def dealers_turn(self):
-        result = self.dealer.move(self.deck, self.dealer.hand)
-        if result == 'bust':
+        self.dealer.move(self.deck, self.dealer.hand)
+        if self.dealer.busted:
             self.discard_hand(self.dealer)
+            self.dealer.busted = False
 
     def discard_hand(self, player):
+        """ Move the players hand to the discard pile """
         for card in player.hand:
             self.discard_pile.receives(card)
-        player.init_hand()
+        player.empty_hand()
+
+    def play(self):
+        deck = self.deck
+        deck.shuffle()
+        self.burn_a_card()
+        while len(deck) > 3 * (len(self.players) + 1):
+            self.play_round()
+        for player in self.players:
+            self._logger.info("\n\n***** Deck summary *****")
+            self._logger.info(f"{player} won {player.wins} hands!")
+            self._logger.info(f"{player} lost {player.losses} hands!")
+            self._logger.info(f"{player} bankroll is ${player.bankroll}")
+
+    def play_round(self):
+        self.take_bets()
+        self.deal_round()
+        if not self.check_for_blackjack():
+            self.players_turn()
+            self.dealers_turn()
+            self.settle()
+        else:
+            for player in self.players:
+                if player.total != 21:
+                    player.losses += 1
+        self.discard_hand(self.dealer)
+        for player in self.players:
+            self.discard_hand(player)
+
+    def players_turn(self):
+        deck = self.deck
+        for player in self.players:
+            player.move(deck, self.dealer.hand)
+            if player.busted:
+                self.discard_hand(player)
+
+    def settle(self):
+        dealer = self.dealer
+        for player in reversed(self.players):
+            if player.busted:
+                self._logger.info(f"*** {player} loses ${player.hand.bet}! ***")
+                player.losses += 1
+                player.busted = False
+            elif player.total > dealer.total:
+                self._logger.info(f"*** {player} wins ${player.hand.bet}! ***")
+                player.bankroll += player.hand.bet * 2
+                player.wins += 1
+            elif player.total == dealer.total:
+                self._logger.info(f"*** {player} pushes! ***")
+                player.bankroll += player.hand.bet
+
+            else:
+                self._logger.info(f"*** {player} loses ${player.hand.bet}! ***")
+                player.losses += 1
+            self._logger.info("\n")
+
+    def take_bets(self):
+        for player in self.players:
+            player.place_bet()
 
     def _init_logger(self, console_log_level=None, file_log_level=None):
         """ Initialize the log file and logger. """
@@ -116,47 +180,3 @@ class Blackjack:
         console.setFormatter(formatter)
         # add the handler to the root logger
         logging.getLogger('').addHandler(console)
-
-    def play(self):
-        deck = self.deck
-        deck.shuffle()
-        self.burn_a_card()
-        while len(deck) > 3 * (len(self.players) + 1):
-            self.play_round()
-        for player in self.players:
-            self._logger.info("\n\n***** Deck summary *****")
-            self._logger.info(f"{player} won {player.wins} hands!")
-            self._logger.info(f"{player} lost {player.losses} hands!")
-
-    def play_round(self):
-        self.deal_round()
-        if not self.check_for_blackjack():
-            self.players_turn()
-            self.dealers_turn()
-            self.settle()
-        else:
-            for player in self.players:
-                if player.total != 21:
-                    player.losses += 1
-        self.discard_hand(self.dealer)
-        for player in self.players:
-            self.discard_hand(player)
-
-    def players_turn(self):
-        deck = self.deck
-        for player in self.players:
-            result = player.move(deck, self.dealer.hand)
-            if result == 'bust':
-                self.discard_hand(player)
-
-    def settle(self):
-        dealer = self.dealer
-        for player in reversed(self.players):
-            if player.total > dealer.total:
-                self._logger.info(f"*** {player} wins! ***")
-                player.wins += 1
-            elif player.total == dealer.total:
-                self._logger.info(f"*** {player} pushes! ***")
-            else:
-                self._logger.info(f"*** {player} loses")
-                player.losses += 1
