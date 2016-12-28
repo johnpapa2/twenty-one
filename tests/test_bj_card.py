@@ -31,7 +31,7 @@ class Test_BJ_Card(unittest.TestCase):
     def test_value_ace(self):
         """ Test 'value' property returns correct value for card rank Ace. """
         card = BjCard('spades', 'A')
-        self.assertEqual(card.value, 11)
+        self.assertEqual(card.value, 1)
 
 if __name__ == "__main__":
     # import sys;sys.argv = ['', 'Test.testName']
