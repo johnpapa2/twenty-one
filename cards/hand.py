@@ -26,7 +26,8 @@ class Hand:
     @property
     def value(self):
         """ Return the value of the hand """
-        value = 0
-        for card in self._cards:
-            value += card.value
+        value = sum(card.value for card in self._cards)
+        if value > 21:
+            if any(card.rank == 'A' for card in self._cards):
+                value -= 10
         return value
