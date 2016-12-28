@@ -18,6 +18,7 @@ class Player():
         self._name = name
         self._position = position
         self._hand = Hand()
+        self._bankroll = 1000
         self._busted = False
         self._wins = 0
         self._losses = 0
@@ -27,8 +28,20 @@ class Player():
         elif position == 'Player':
             self._logger.info(f"{self} sits at table")
 
+    @property
+    def bankroll(self):
+        return self._bankroll
+
+    @bankroll.setter
+    def bankroll(self, value):
+        self._bankroll = value
+
     def __str__(self):
         return f"{self.position} {self.name}"
+
+    @property
+    def bet(self):
+        return self.hand.bet
 
     @property
     def busted(self):
@@ -77,15 +90,7 @@ class Player():
         hand = '] ['.join(ranks)
         self._logger.info(f"{self} has [{hand}]")
 
-    def doubles(self, card):
-        self._logger.info(f"{self} doubles")
-        self.receives(card)
-
-    def hits(self, card):
-        self._logger.info(f"{self} hits")
-        self.receives(card)
-
-    def init_hand(self):
+    def empty_hand(self):
         self._hand = Hand()
 
     def move(self, deck, dealers_hand):
@@ -98,10 +103,14 @@ class Player():
                 while move != 'stand':
                     move = click.prompt(f"Hand total {self.total}, Your Move", default='stand')
                     if move == 'hit':
-                        self.hits(deck.deal_card())
+                        self._logger.info(f"{self} hits")
+                        self.receives(deck.deal_card())
                         self.display_hand()
                     elif move == 'double':
-                        self.doubles(deck.deal_card())
+                        self._logger.info(f"{self} doubles")
+                        self.hand.bet += self.hand.bet
+                        self.bankroll -= self.hand.bet
+                        self.receives(deck.deal_card())
                         self.display_hand()
                         break
                     if self.total > 21:
@@ -113,13 +122,22 @@ class Player():
         else:
             self.display_hand()
             while self.total < 17:
-                self.hits(deck.deal_card())
+                self.receives(deck.deal_card())
                 self.display_hand()
                 if self.total > 21:
                     self.busted = True
                     break
 
         self._logger.info(f"{self}'s hand value is {self.total}")
+
+    def place_bet(self):
+        self._logger.info(f"{self}'s bankroll is ${self.bankroll}")
+        bet = click.prompt(f"{self}, please place your bet", default=10)
+        while self.bankroll - bet < 0:
+            bet = click.prompt(f"{self}, please place your bet", default=10)
+        self.bankroll -= bet
+        self.hand.bet = bet
+        self._logger.info(f"{self} bets ${bet} dollars.")
 
     def receives(self, card):
         self.hand.add_card(card)
