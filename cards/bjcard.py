@@ -25,7 +25,7 @@ class BjCard(Card):
             self._value = int(self.rank)
         elif self.rank in list('JQK'):
             self._value = 10
-        else:
-            self._value = 11
+        elif self.rank == 'A':
+            self._value = 1
         self._logger.debug(f"My {self} is worth {self._value} points")
         return self._value

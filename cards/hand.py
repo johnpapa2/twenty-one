@@ -27,7 +27,10 @@ class Hand:
     def value(self):
         """ Return the value of the hand """
         value = sum(card.value for card in self._cards)
-        if value > 21:
-            if any(card.rank == 'A' for card in self._cards):
-                value -= 10
+        if value < 21:
+            for card in self._cards:
+                if card.rank == 'A':
+                    value += 10
+                    if value > 21:
+                        value -= 10
         return value
