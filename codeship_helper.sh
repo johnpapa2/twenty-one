@@ -14,9 +14,9 @@ tar --strip-components 1 -xvf pypy3-2.4-linux_x86_64-portable.tar.bz2
 cd ..
 
 mkdir -p ~/.local
-wget https://www.python.org/ftp/python/3.6.0/Python-3.6.0.tar.xz
-tar xvf Python-3.6.0.tar.xz
-cd Python-3.6.0
+wget https://www.python.org/ftp/python/3.5.2/Python-3.5.2.tar.xz
+tar xvf Python-3.5.2.tar.xz
+cd Python-3.5.2
 ./configure --prefix=/home/$USER/.local/
 make
 make install
