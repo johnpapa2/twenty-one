@@ -11,7 +11,7 @@ import unittest
 from cards.card import Card
 
 
-class Test_Card(unittest.TestCase):
+class TestCard(unittest.TestCase):
     def setUp(self):
         self._suit = "clubs"
         self._rank = "10"

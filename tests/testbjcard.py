@@ -11,7 +11,7 @@ import unittest
 from cards.bjcard import BjCard
 
 
-class Test_BJ_Card(unittest.TestCase):
+class TestBjCard(unittest.TestCase):
     def setUp(self):
         pass
 
