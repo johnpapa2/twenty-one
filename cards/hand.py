@@ -22,7 +22,7 @@ class Hand:
 
     def __str__(self):
         """ Display the hand on the command line """
-        ranks = [card.rank for card in self.hand]
+        ranks = [card.rank for card in self._cards]
         hand = '] ['.join(ranks)
         return (f"[{hand}]")
 
