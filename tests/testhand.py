@@ -34,7 +34,7 @@ class TestHand(unittest.TestCase):
         hand = self._hand
         self.assertEqual(hand.bet, self._bet)
 
-    def test_bet(self):
+    def test_bet_setter(self):
         """ Test 'bet' setter property sets the bet value """
         hand = self._hand
         new_bet = 200
