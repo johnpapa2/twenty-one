@@ -95,9 +95,9 @@ class TestPlayer(unittest.TestCase):
     def test_place_bet(self):
         """ Test 'place_bet' adds the bet to the hand """
         player = self._player
-        player.place_bet()
         runner = CliRunner()
-        result = runner.invoke(player.place_bet(), [325])
+        result = runner.invoke(player.place_bet, input='250')
+        self.assertEqual(player.bet, 250)
 
     def test_role(self):
         """ Test 'role' property returns the player's role """
