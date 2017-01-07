@@ -109,8 +109,8 @@ class Player():
                         self._logger.info(self.display_hand())
                     elif move == 'double':
                         self._logger.info(f"{self} doubles")
-                        self.hand.bet += self.hand.bet
                         self.bankroll -= self.hand.bet
+                        self.hand.bet += self.hand.bet
                         self.receives(deck.deal_card())
                         self._logger.info(self.display_hand())
                         break

@@ -119,6 +119,10 @@ class Blackjack:
     def settle(self):
         dealer = self.dealer
         for player in reversed(self.players):
+            if player.total == 21 and len(player.hand) == 2:
+                self._logger.info(f"*** {player} wins ${player.hand.bet} with a Natural! ***")
+                player.bankroll += player.hand.bet * 2.5
+                player.wins += 1
             if player.busted:
                 self._logger.info(f"*** {player} loses ${player.hand.bet}! ***")
                 player.losses += 1
