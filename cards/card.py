@@ -8,6 +8,7 @@ This work is licensed under the MIT License.
 """
 from abc import ABCMeta, abstractproperty
 
+
 class Card(metaclass=ABCMeta):
 
     def __init__(self, suit, rank):

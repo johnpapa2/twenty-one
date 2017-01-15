@@ -10,6 +10,7 @@ import logging
 
 from .card import Card
 
+
 class BjCard(Card):
 
     def __init__(self, suit, rank):

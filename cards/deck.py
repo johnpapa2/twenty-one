@@ -40,4 +40,3 @@ class Deck:
         """ Shuffle the deck """
         random.shuffle(self._cards)
         self._logger.info("Now's a good time to smoke a cig while I shuffle")
-

@@ -7,6 +7,7 @@ Copyright 2016 John Papa.  All rights reserved.
 This work is licensed under the MIT License.
 """
 
+
 class Hand:
 
     def __init__(self):
