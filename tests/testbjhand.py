@@ -8,7 +8,7 @@ This work is licensed under the MIT License.
 """
 import unittest
 
-from cards.bjhand import BjHand
+from players.bjhand import BjHand
 from cards.bjcard import BjCard
 
 

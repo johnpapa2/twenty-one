@@ -8,7 +8,7 @@ This work is licensed under the MIT License.
 """
 import unittest
 
-from bet import Bet
+from players.bet import Bet
 
 
 class TestBet(unittest.TestCase):

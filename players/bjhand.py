@@ -9,7 +9,7 @@ This work is licensed under the MIT License.
 import logging
 
 from .hand import Hand
-from bet import Bet
+from .bet import Bet
 
 
 class BjHand(Hand):

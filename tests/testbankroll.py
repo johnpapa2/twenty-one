@@ -8,7 +8,7 @@ This work is licensed under the MIT License.
 """
 import unittest
 
-from bankroll import Bankroll
+from players.bankroll import Bankroll
 
 
 class TestBankroll(unittest.TestCase):
