@@ -1,9 +1,9 @@
 """
-Created on Dec 24, 2016
+Created on Jan 16, 2017
 
 @author: john papa
 
-Copyright 2016 John Papa.  All rights reserved.
+Copyright 2017 John Papa.  All rights reserved.
 This work is licensed under the MIT License.
 """
 import unittest
