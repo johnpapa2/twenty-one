@@ -18,8 +18,10 @@ class Deck:
         """ Initialize a standard 52 card deck in order """
         self._ranks = ['A'] + [str(n) for n in range(2, 11)] + ['J', 'Q', 'K']
         self._suits = ['spades', 'diamonds', 'clubs', 'hearts']
-        self._cards = [BjCard(suit, rank) for suit in self._suits for rank in self._ranks if suit == 'spades' or suit == 'diamonds']
-        self._cards += [BjCard(suit, rank) for suit in self._suits for rank in reversed(self._ranks) if suit == 'clubs' or suit == 'hearts']
+        # New decks of cards increase in rank from Ace (low) to King for two suits
+        self._cards = [BjCard(suit, rank) for suit in self._suits for rank in self._ranks if suit in ['spades', 'diamonds']]
+        # Then the ranks go in reverse for the other half of the deck
+        self._cards += [BjCard(suit, rank) for suit in self._suits for rank in reversed(self._ranks) if suit in ['clubs', 'hearts']]
         self._logger = logging.getLogger('bj')
         self._logger.info("New deck of cards opened and spread")
 
@@ -38,5 +40,7 @@ class Deck:
 
     def shuffle(self):
         """ Shuffle the deck """
+        # TODO: Implement real shuffling algorithms to simulate how people actually shuffle
+        #       This will be useful for shuffle tracking simulations
         random.shuffle(self._cards)
-        self._logger.info("Now's a good time to smoke a cig while I shuffle")
+        self._logger.info("Now's a good time to take a break while I shuffle")

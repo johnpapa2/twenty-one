@@ -6,13 +6,13 @@ Created on Dec 24, 2016
 Copyright 2016 John Papa.  All rights reserved.
 This work is licensed under the MIT License.
 """
+from abc import ABCMeta, abstractmethod
 
 
-class Hand:
+class Hand(metaclass=ABCMeta):
 
     def __init__(self):
         self._cards = list()
-        self._bet = 0
 
     def __getitem__(self, position):
         return self._cards[position]
@@ -27,24 +27,16 @@ class Hand:
         hand = '] ['.join(ranks)
         return (f"[{hand}]")
 
-    @property
-    def bet(self):
-        return self._bet
-
-    @bet.setter
-    def bet(self, value):
-        self._bet = value
-
     def add_card(self, card):
         """ Add a card to the hand """
         self._cards.append(card)
 
-    @property
+    def remove_card(self, position):
+        """ Remove a card from the hand """
+        card = self[position]
+        self._cards.remove(card)
+        return card
+
+    @abstractmethod
     def value(self):
         """ Return the value of the hand """
-        value = sum(card.value for card in self._cards)
-        if value < 21:
-            for card in self._cards:
-                if card.rank == 'A' and value <= 11:
-                    value += 10
-        return value
