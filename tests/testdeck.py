@@ -19,7 +19,7 @@ class TestDeck(unittest.TestCase):
         pass
 
     def test_deal_card(self):
-        """ Test 'deal_card' deals the top card from the deck """
+        """ Test deck can deal the top card from the deck """
         deck = self._deck
         card = deck[0]
         self.assertEqual(len(deck), 52)
@@ -28,7 +28,7 @@ class TestDeck(unittest.TestCase):
         self.assertEqual(dealt_card, card)
 
     def test_shuffle(self):
-        """ Test 'shuffle' shuffles the deck """
+        """ Test the deck can be shuffled """
         deck = self._deck
         unshuffled_deck = [card for card in deck]
         deck.shuffle()

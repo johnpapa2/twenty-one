@@ -24,47 +24,47 @@ class TestPlayer(unittest.TestCase):
         pass
 
     def test_bankroll(self):
-        """ Test 'bankroll' property returns the bankroll value """
+        """ Test player has a bankroll """
         player = self._player
         self.assertEqual(player.bankroll.amount, 1000)
 
     def test_bankroll_setter(self):
-        """ Test 'bankroll' setter property sets the bankroll value """
+        """ Test player can set the bankroll value """
         player = self._player
         player.bankroll.amount = 5250
         self.assertEqual(player.bankroll.amount, 5250)
 
     def test_display_hand(self):
-        """ Test 'display_hand' returns the correct hand display """
+        """ Test player can correctly display a hand """
         player = self._player
         self.assertEqual(player.display_hand(), 'Player John has [10] [A]')
 
     def test_dunder_str(self):
-        """ Test '__str__' returns the correct player display """
+        """ Test player name and role are correctly displayed """
         player = self._player
         self.assertEqual(str(player), 'Player John')
 
     def test_hand(self):
-        """ Test 'hand' property returns the players hand """
+        """ Test player has a hand """
         player = self._player
         for index, card in enumerate(player.hand):
             self.assertEqual(card, self._cards[index])
 
     def test_name(self):
-        """ Test 'name' property returns the player's name """
+        """ Test player has a name """
         player = self._player
         self.assertEqual(player.name, 'John')
 
     @unittest.skip("Not sure how to test click inputs")
     def test_place_bet(self):
-        """ Test 'place_bet' adds the bet to the hand """
+        """ Test player can place a bet """
         player = self._player
         runner = CliRunner()
         result = runner.invoke(player.place_bet, input='250')
         self.assertEqual(player.bet, 250)
 
     def test_role(self):
-        """ Test 'role' property returns the player's role """
+        """ Test player has a role """
         player = self._player
         self.assertEqual(player.role, 'Player')
 
