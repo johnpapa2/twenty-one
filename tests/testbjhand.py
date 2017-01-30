@@ -45,21 +45,37 @@ class TestBjHand(unittest.TestCase):
             hand.add_card(card)
         self.assertEqual(hand.value, 21)
 
-    def test_value_soft_hand(self):
-        """ Test bj hand returns the hand value for a soft hand """
+    def test_value_hard_hand(self):
+        """ Test bj hand returns the hand value for a hard hand """
         hand = self._hand
         cards = [BjCard('spades', '6'), BjCard('hearts', 'A'), BjCard('clubs', 'K')]
         for card in cards:
             hand.add_card(card)
         self.assertEqual(hand.value, 17)
 
-    def test_value_soft_hand_two_aces(self):
-        """ Test bj hand returns the hand value for a soft hand with two aces """
+    def test_value_hard_hand_two_aces(self):
+        """ Test bj hand returns the hand value for a hard hand with two aces """
         hand = self._hand
         cards = [BjCard('spades', '6'), BjCard('hearts', 'A'), BjCard('clubs', 'K'), BjCard('diamonds', 'A')]
         for card in cards:
             hand.add_card(card)
         self.assertEqual(hand.value, 18)
+
+    def test_value_soft_hand(self):
+        """ Test bj hand returns the hand value for a soft hand """
+        hand = self._hand
+        cards = [BjCard('diamonds', '7'), BjCard('hearts', 'A')]
+        for card in cards:
+            hand.add_card(card)
+        self.assertEqual(hand.value, 18)
+
+    def test_value_soft_hand_two_aces(self):
+        """ Test bj hand returns the hand value for a soft hand with two aces """
+        hand = self._hand
+        cards = [BjCard('spades', '2'), BjCard('hearts', 'A'), BjCard('clubs', '5'), BjCard('diamonds', 'A')]
+        for card in cards:
+            hand.add_card(card)
+        self.assertEqual(hand.value, 19)
 
 if __name__ == "__main__":
     # import sys;sys.argv = ['', 'Test.testName']
