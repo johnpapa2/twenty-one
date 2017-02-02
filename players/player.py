@@ -9,6 +9,7 @@ This work is licensed under the MIT License.
 import click
 import logging
 
+from .bet import Bet
 from .bankroll import Bankroll
 from .bjhand import BjHand
 
@@ -16,6 +17,7 @@ from .bjhand import BjHand
 class Player():
 
     def __init__(self, name, role='Player'):
+        self._bet = Bet()
         self._bankroll = Bankroll(1000)
         self._hand = BjHand()
         self._name = name
@@ -32,6 +34,10 @@ class Player():
     @property
     def bankroll(self):
         return self._bankroll
+
+    @property
+    def bet(self):
+        return self._bet
 
     @property
     def hand(self):
@@ -86,13 +92,10 @@ class Player():
 
         self._logger.info(f"{self}'s hand value is {self.total}")
 
-    def place_bet(self):
-        self._logger.info(f"{self}'s bankroll is ${self.bankroll}")
-        bet = click.prompt(f"{self}, please place your bet", default=10)
-        while self.bankroll - bet < 0:
-            bet = click.prompt(f"{self}, please place your bet", default=10)
-        self.bankroll -= bet
-        self.hand.bet = bet
+    def place_bet(self, bet):
+        self._logger.info(f"{self}'s bankroll is ${self.bankroll.amount}")
+        self.bankroll.amount -= bet
+        self.bet.amount = bet
         self._logger.info(f"{self} bets ${bet} dollars.")
 
     def receives(self, card):

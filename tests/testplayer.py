@@ -34,6 +34,17 @@ class TestPlayer(unittest.TestCase):
         player.bankroll.amount = 5250
         self.assertEqual(player.bankroll.amount, 5250)
 
+    def test_bet(self):
+        """ Test player has a bankroll """
+        player = self._player
+        self.assertEqual(player.bet.amount, 0)
+
+    def test_place_bet(self):
+        """ Test player can set the bankroll value """
+        player = self._player
+        player.place_bet(250)
+        self.assertEqual(player.bet.amount, 250)
+
     def test_display_hand(self):
         """ Test player can correctly display a hand """
         player = self._player
@@ -54,14 +65,6 @@ class TestPlayer(unittest.TestCase):
         """ Test player has a name """
         player = self._player
         self.assertEqual(player.name, 'John')
-
-    @unittest.skip("Not sure how to test click inputs")
-    def test_place_bet(self):
-        """ Test player can place a bet """
-        player = self._player
-        runner = CliRunner()
-        result = runner.invoke(player.place_bet, input='250')
-        self.assertEqual(player.bet, 250)
 
     def test_role(self):
         """ Test player has a role """
