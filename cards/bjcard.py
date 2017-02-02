@@ -10,6 +10,7 @@ import logging
 
 from .card import Card
 
+
 class BjCard(Card):
 
     def __init__(self, suit, rank):
@@ -26,6 +27,11 @@ class BjCard(Card):
         elif self.rank in list('JQK'):
             self._value = 10
         elif self.rank == 'A':
-            self._value = 1
+            self._value = 11
         self._logger.debug(f"My {self} is worth {self._value} points")
         return self._value
+
+    def set_ace_low(self):
+        """ Set the value of an Ace to 1 """
+        if self.rank == 'A':
+            self._value = 1

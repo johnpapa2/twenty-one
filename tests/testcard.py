@@ -26,12 +26,12 @@ class TestCard(unittest.TestCase):
             Card()
 
     def test_rank(self):
-        """ Test 'rank' property returns correct rank. """
+        """ Test card has correct rank. """
         card = self._card
         self.assertEqual(card.rank, self._rank)
 
     def test_suit(self):
-        """ Test 'suit' property returns correct suit. """
+        """ Test card has correct suit. """
         card = self._card
         self.assertEqual(card.suit, self._suit)
 
