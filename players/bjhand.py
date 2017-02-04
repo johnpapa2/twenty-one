@@ -39,7 +39,7 @@ class BjHand(Hand):
         """ Checks to see if a hand can be split into two hands """
         splittable = False
         if len(self) == 2:
-            if self._cards[0].value == self._cards[1].value:
+            if self.cards[0].value == self.cards[1].value:
                 splittable = True
         return splittable
 
@@ -58,12 +58,12 @@ class BjHand(Hand):
     @property
     def value(self):
         """ Return the value of the hand """
-        value = sum(card.value for card in self._cards)
+        value = sum(card.value for card in self.cards)
         if value > 21:
-            for card in self._cards:
+            for card in self.cards:
                 if card.rank == 'A' and card.value == 11:
                     card.set_ace_low()
-                    value = sum(card.value for card in self._cards)
+                    value = sum(card.value for card in self.cards)
                 if value <= 21:
                     break
         return value

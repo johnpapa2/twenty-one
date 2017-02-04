@@ -8,7 +8,7 @@ This work is licensed under the MIT License.
 """
 
 
-class Bet:
+class Bet():
     """ This is a class for Bets used in the game of Blackjack.
 
     Bets from this class should work for any standard game of blackjack or twenty-one.

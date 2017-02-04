@@ -8,7 +8,7 @@ This work is licensed under the MIT License.
 """
 
 
-class Bankroll:
+class Bankroll():
     """ This is a class for Bankrolls used in the game of Blackjack or other gambling games.
 
     Bankrolls from this class should work for any game that requires a bankroll.

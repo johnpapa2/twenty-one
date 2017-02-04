@@ -12,10 +12,10 @@ import random
 from .bjcard import BjCard
 
 
-class Shoe:
-    """ This is a class for a Shoe composed of blackjack cards.
+class Shoe():
+    """ This is a class for a Shoe composed of cards from one or more french decks.
 
-    A shoe from this class should work for any standard game of blackjack or twenty-one.
+    A shoe from this class should work for any standard card game.
 
     """
     def __init__(self, num_decks=1):
