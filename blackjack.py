@@ -6,23 +6,35 @@ Created on Dec 24, 2016
 Copyright 2016 John Papa.  All rights reserved.
 This work is licensed under the MIT License.
 """
+import click
 import logging
 import os
 import uuid
 
-from cards.deck import Deck
-from cards.hand import Hand
+from cards.shoe import Shoe
+from cards.discardpile import DiscardPile
+from players.bjhand import BjHand
 from players.player import Player
 
 
-class Blackjack:
+class Blackjack():
+    """ This is a class for the command line interface used for the game of Blackjack.
 
+    This class should work for any standard game of blackjack or twenty-one.
+
+    """
     def __init__(self, player_names, console_log_level=None, file_log_level=None):
-        """ Initialize """
-        self._deck = Deck()
+        """ Initialize the blackjack game
+
+        Arguments:
+            player_names - A list of player names
+            console_log_level - The log level for stdout
+            file_log_level - The log level used for writing to the log file.
+        """
+        self._shoe = Shoe()
         self._dealer = Player('Mora', 'Dealer')
         self._players = [Player(name, 'Player') for name in player_names]
-        self._discard_pile = Player('Pile', 'Discard')
+        self._discard_pile = DiscardPile()
         self._log_directory = "./logs"
         self._init_logger(console_log_level, file_log_level)
         self._logger = logging.getLogger('bj')
@@ -32,8 +44,8 @@ class Blackjack:
         return self._dealer
 
     @property
-    def deck(self):
-        return self._deck
+    def shoe(self):
+        return self._shoe
 
     @property
     def discard_pile(self):
@@ -44,8 +56,8 @@ class Blackjack:
         return self._players
 
     def burn_a_card(self):
-        """ Burn the top card in the deck """
-        card = self.deck.deal_card()
+        """ Burn the top card in the shoe """
+        card = self.shoe.deal_card()
         self._logger.info(f"Burn the {card}")
         self.discard_pile.receives(card)
 
@@ -55,7 +67,7 @@ class Blackjack:
         dealer = self.dealer
         if any([dealer.hand[0].value in [1, 10]]):
             self._logger.info("Check for blackjack")
-            if self.dealer.total == 21:
+            if self.dealer.hand.value == 21:
                 self._logger.info("***** DEALER HAS TWENTY-ONE! BLACKJACK! *****")
                 got_blackjack = True
         return got_blackjack
@@ -65,34 +77,24 @@ class Blackjack:
         self._logger.info("No more bets. Good luck.")
         for i in range(2):
             for player in self.players:
-                player.receives(self.deck.deal_card())
+                player.receives(self.shoe.deal_card())
 
-            self.dealer.receives(self.deck.deal_card())
+            self.dealer.place_bet(0)
+            self.dealer.receives(self.shoe.deal_card())
         self._logger
 
     def dealers_turn(self):
-        self.dealer.move(self.deck, self.dealer.hand)
-        if self.dealer.busted:
+        self._logger.info(self.dealer.display_hand())
+        action = click.prompt(f"{self.dealer}'s turn", default='stand')
+        self.dealer.move(action, self.shoe)
+        if self.dealer.hand.value > 21:
             self.discard_hand(self.dealer)
             self.dealer.busted = False
 
     def discard_hand(self, player):
         """ Move the players hand to the discard pile """
-        for card in player.hand:
+        for card in player.discard_hand():
             self.discard_pile.receives(card)
-        player.empty_hand()
-
-    def play(self):
-        deck = self.deck
-        deck.shuffle()
-        self.burn_a_card()
-        while len(deck) > 3 * (len(self.players) + 1):
-            self.play_round()
-        for player in self.players:
-            self._logger.info("\n\n***** Deck summary *****")
-            self._logger.info(f"{player} won {player.wins} hands!")
-            self._logger.info(f"{player} lost {player.losses} hands!")
-            self._logger.info(f"{player} bankroll is ${player.bankroll}")
 
     def play_round(self):
         self.take_bets()
@@ -103,35 +105,39 @@ class Blackjack:
             self.settle()
         else:
             for player in self.players:
-                if player.total != 21:
+                if player.hand.value != 21:
                     player.losses += 1
         self.discard_hand(self.dealer)
         for player in self.players:
             self.discard_hand(player)
 
     def players_turn(self):
-        deck = self.deck
+        shoe = self.shoe
         for player in self.players:
-            player.move(deck, self.dealer.hand)
-            if player.busted:
+            self._logger.info(f"Dealer shows a [{self.dealer.hand[0].rank}]")
+            self._logger.info(player.display_hand())
+            action = click.prompt(f'{player}, your turn', default='stand')
+            player.move(action, shoe)
+            if player.hand.value > 21:
+                self._logger.info(f"{player} busts!")
                 self.discard_hand(player)
 
     def settle(self):
         dealer = self.dealer
         for player in reversed(self.players):
-            if player.total == 21 and len(player.hand) == 2:
+            if player.hand.value == 21 and len(player.hand) == 2:
                 self._logger.info(f"*** {player} wins ${player.hand.bet} with a Natural! ***")
-                player.bankroll += player.hand.bet * 2.5
+                player.bankroll.amount += player.hand.bet.amount * 2.5
                 player.wins += 1
             if player.busted:
                 self._logger.info(f"*** {player} loses ${player.hand.bet}! ***")
                 player.losses += 1
                 player.busted = False
-            elif player.total > dealer.total:
+            elif player.hand.value > dealer.hand.value:
                 self._logger.info(f"*** {player} wins ${player.hand.bet}! ***")
                 player.bankroll += player.hand.bet * 2
                 player.wins += 1
-            elif player.total == dealer.total:
+            elif player.hand.value == dealer.hand.value:
                 self._logger.info(f"*** {player} pushes! ***")
                 player.bankroll += player.hand.bet
 
@@ -142,7 +148,8 @@ class Blackjack:
 
     def take_bets(self):
         for player in self.players:
-            player.place_bet()
+            bet_amount = click.prompt(f'{player}, please place bet', default=25)
+            player.place_bet(bet_amount)
 
     def _init_logger(self, console_log_level=None, file_log_level=None):
         """ Initialize the log file and logger. """
