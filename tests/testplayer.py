@@ -16,9 +16,6 @@ from click.testing import CliRunner
 class TestPlayer(unittest.TestCase):
     def setUp(self):
         self._player = Player('John', 'Player')
-        self._cards = [BjCard('clubs', '10'), BjCard('diamonds', 'A')]
-        for card in self._cards:
-            self._player.hand.add_card(card)
 
     def tearDown(self):
         pass
@@ -34,20 +31,19 @@ class TestPlayer(unittest.TestCase):
         player.bankroll.amount = 5250
         self.assertEqual(player.bankroll.amount, 5250)
 
-    def test_bet(self):
-        """ Test player has a bankroll """
-        player = self._player
-        self.assertEqual(player.bet.amount, 0)
-
     def test_place_bet(self):
-        """ Test player can set the bankroll value """
+        """ Test player can set the bet value """
         player = self._player
         player.place_bet(250)
-        self.assertEqual(player.bet.amount, 250)
+        self.assertEqual(player.hand.bet.amount, 250)
 
     def test_display_hand(self):
         """ Test player can correctly display a hand """
         player = self._player
+        cards = [BjCard('clubs', '10'), BjCard('diamonds', 'A')]
+        player.place_bet(250)
+        for card in cards:
+            player.hand.add_card(card)
         self.assertEqual(player.display_hand(), 'Player John has [10] [A]')
 
     def test_dunder_str(self):
@@ -58,8 +54,12 @@ class TestPlayer(unittest.TestCase):
     def test_hand(self):
         """ Test player has a hand """
         player = self._player
+        cards = [BjCard('spades', '8'), BjCard('hearts', '2')]
+        player.place_bet(400)
+        for card in cards:
+            player.hand.add_card(card)
         for index, card in enumerate(player.hand):
-            self.assertEqual(card, self._cards[index])
+            self.assertEqual(card, cards[index])
 
     def test_name(self):
         """ Test player has a name """
