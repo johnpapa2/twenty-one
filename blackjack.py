@@ -41,18 +41,22 @@ class Blackjack():
 
     @property
     def dealer(self):
+        """ Returns the deal of the current game """
         return self._dealer
 
     @property
     def shoe(self):
+        """ Returns the shoe from the current game """
         return self._shoe
 
     @property
     def discard_pile(self):
+        """ Returns the discard pile of the current game """
         return self._discard_pile
 
     @property
     def players(self):
+        """ Returns the players currently sitting at the table """
         return self._players
 
     def burn_a_card(self):
@@ -60,17 +64,6 @@ class Blackjack():
         card = self.shoe.deal_card()
         self._logger.info(f"Burn the {card}")
         self.discard_pile.receives(card)
-
-    def check_for_blackjack(self):
-        """ Check for dealer blackjack if dealer is showing a Ten value card or an Ace. """
-        got_blackjack = False
-        dealer = self.dealer
-        if any([dealer.hand[0].value in [1, 10]]):
-            self._logger.info("Check for blackjack")
-            if self.dealer.hand.value == 21:
-                self._logger.info("***** DEALER HAS TWENTY-ONE! BLACKJACK! *****")
-                got_blackjack = True
-        return got_blackjack
 
     def deal_round(self):
         """ Deal a round of blackjack """
@@ -84,6 +77,7 @@ class Blackjack():
         self._logger
 
     def dealers_turn(self):
+        """ Dealers turn """
         self._logger.info(self.dealer.display_hand())
         action = click.prompt(f"{self.dealer}'s turn", default='stand')
         self.dealer.move(action, self.shoe)
@@ -97,9 +91,10 @@ class Blackjack():
             self.discard_pile.receives(card)
 
     def play_round(self):
+        """ Play a round of blackjack, from Players placing bets until bets are settled """
         self.take_bets()
         self.deal_round()
-        if not self.check_for_blackjack():
+        if not self.dealer.hand.is_blackjack:
             self.players_turn()
             self.dealers_turn()
             self.settle()
@@ -112,6 +107,7 @@ class Blackjack():
             self.discard_hand(player)
 
     def players_turn(self):
+        """ Players turn """
         shoe = self.shoe
         for player in self.players:
             self._logger.info(f"Dealer shows a [{self.dealer.hand[0].rank}]")
@@ -123,6 +119,7 @@ class Blackjack():
                 self.discard_hand(player)
 
     def settle(self):
+        """ Settle the bets at the end of the round. Pay winners, take loser's bets and push equal hands """
         dealer = self.dealer
         for player in reversed(self.players):
             if player.hand.value == 21 and len(player.hand) == 2:
@@ -147,12 +144,18 @@ class Blackjack():
             self._logger.info("\n")
 
     def take_bets(self):
+        """ Give each player a chance to place a bet before dealing a round """
         for player in self.players:
             bet_amount = click.prompt(f'{player}, please place bet', default=25)
             player.place_bet(bet_amount)
 
     def _init_logger(self, console_log_level=None, file_log_level=None):
-        """ Initialize the log file and logger. """
+        """ Initialize the log file and logger.
+
+        Arguments:
+            console_log_level - The log level used for displaying output to standard out.
+            file_log_level - The logging level to use for the log files.
+        """
         # Create log directory if it doesn't already exist.
         if not os.path.exists(self._log_directory):
             os.makedirs(self._log_directory)
