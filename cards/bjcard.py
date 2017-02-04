@@ -12,14 +12,24 @@ from .card import Card
 
 
 class BjCard(Card):
+    """ This is a class for Cards used in the game of Blackjack.
 
+    Cards from this class should work for any standard game of blackjack or twenty-one.
+
+    """
     def __init__(self, suit, rank):
+        """ Initialize the card with a rank and suit
+
+        Arguments:
+            suit - The suit of the card. Allowed values are 'spades', 'diamonds', 'clubs', or 'hearts'.
+            rank - The rank of the card. Allowed values are 'A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'.
+        """
         super().__init__(suit, rank)
         self._logger = logging.getLogger('bj')
 
     @property
     def value(self):
-        """ Returns the value of the card used for scoring the game """
+        """ Returns the value of the card based on a standard game of Blackjack """
         if self._value:
             return self._value
         elif self.rank not in list('JQKA'):

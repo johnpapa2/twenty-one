@@ -13,9 +13,17 @@ from .bjcard import BjCard
 
 
 class Shoe:
+    """ This is a class for a Shoe composed of blackjack cards.
 
+    A shoe from this class should work for any standard game of blackjack or twenty-one.
+
+    """
     def __init__(self, num_decks=1):
-        """ Initialize a standard 52 card deck in order """
+        """ Initialize shoe with n number of decks, with each deck in standard 52 card new deck order
+
+        Arguments:
+            num_decks - The number of decks in the shoe.
+        """
         self._ranks = ['A'] + [str(n) for n in range(2, 11)] + ['J', 'Q', 'K']
         self._suits = ['spades', 'diamonds', 'clubs', 'hearts']
         self._cards = list()
@@ -28,20 +36,25 @@ class Shoe:
             self._logger.info("New deck of cards opened and spread")
 
     def __getitem__(self, position):
+        """ Return the card at a given position
+
+        Arguments:
+            position - The position of the card to return
+        """
         return self._cards[position]
 
     def __len__(self):
-        """ Return the number of cards in the deck """
+        """ Return the number of cards in the shoe """
         return len(self._cards)
 
     def deal_card(self):
-        """ Remove the top card from the deck and return it """
+        """ Remove the top card from the shoe and return it """
         card = self._cards.pop(0)
         self._logger.debug(f"  Dealing a {card}")
         return card
 
     def shuffle(self):
-        """ Shuffle the deck """
+        """ Shuffle the shoe """
         # TODO: Implement real shuffling algorithms to simulate how people actually shuffle
         #       This will be useful for shuffle tracking simulations
         random.shuffle(self._cards)
