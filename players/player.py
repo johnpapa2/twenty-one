@@ -49,6 +49,15 @@ class Player():
         """ Returns the player's hand """
         return self._hand
 
+    @hand.setter
+    def hand(self, new_hand):
+        """ Set the player's hand to a new hand
+
+        Arguments:
+            new_hand - The new hand to set the player's hand to.
+        """
+        self._hand = new_hand
+
     @property
     def name(self):
         """ Returns the player's name """

@@ -35,6 +35,9 @@ class Blackjack():
         self._players = [Player(name, 'Player') for name in player_names]
         self._discard_pile = DiscardPile()
         self._log_directory = "./logs"
+        self._wins = dict()
+        for player in self.players:
+            self._wins[player] = 0
         self._init_logger(console_log_level, file_log_level)
         self._logger = logging.getLogger('bj')
 
@@ -57,6 +60,11 @@ class Blackjack():
     def players(self):
         """ Returns the players currently sitting at the table """
         return self._players
+
+    @property
+    def wins(self):
+        """ Returns a dictionary with the number of wins"""
+        return self._wins
 
     def burn_a_card(self):
         """ Burn the top card in the shoe """
@@ -122,17 +130,16 @@ class Blackjack():
         dealer = self.dealer
         for player in reversed(self.players):
             if player.hand.value == 21 and len(player.hand) == 2:
-                self._logger.info(f"*** {player} wins ${player.hand.bet} with a Natural! ***")
+                self._logger.info(f"*** {player} wins ${player.hand.bet.amount} with a Natural! ***")
                 player.bankroll.amount += player.hand.bet.amount * 2.5
                 player.wins += 1
-            if player.busted:
-                self._logger.info(f"*** {player} loses ${player.hand.bet}! ***")
+            if player.hand is None:
+                self._logger.info(f"*** {player} loses ${player.hand.bet.amount}! ***")
                 player.losses += 1
-                player.busted = False
             elif player.hand.value > dealer.hand.value:
-                self._logger.info(f"*** {player} wins ${player.hand.bet}! ***")
-                player.bankroll += player.hand.bet * 2
-                player.wins += 1
+                self._logger.info(f"*** {player} wins ${player.hand.bet.amount}! ***")
+                player.bankroll.invest(player.hand.bet.amount * 2)
+                self.wins[player] += 1
             elif player.hand.value == dealer.hand.value:
                 self._logger.info(f"*** {player} pushes! ***")
                 player.bankroll += player.hand.bet
