@@ -87,13 +87,14 @@ class Player():
         """
         if self.role == 'Player':
             self._logger.info(f"{self} doubles")
-            self.bankroll -= self.hand.bet
-            self.hand.bet += self.hand.bet
+            self.bankroll.withdraw(self.hand.bet.amount)
+            self.hand.bet.increase(self.hand.bet.amount)
             self.receives(shoe.deal_card())
             self._logger.info(self.display_hand())
             if self.hand.value > 21:
                 self.busted = True
                 self._logger.info(f"{self} Busted!")
+            self._logger.info(f"*** {self} loses ${self.hand.bet.amount}! ***")
         else:
             return
         self._logger.info(f"{self}'s hand value is {self.hand.value}")
@@ -110,6 +111,7 @@ class Player():
         if self.hand.value > 21:
             self.busted = True
             self._logger.info(f"{self} Busted!")
+            self._logger.info(f"*** {self} loses ${self.hand.bet.amount}! ***")
         self._logger.info(f"{self}'s hand value is {self.hand.value}")
 
     def move(self, action, shoe):

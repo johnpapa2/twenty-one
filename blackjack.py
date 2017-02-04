@@ -35,9 +35,11 @@ class Blackjack():
         self._players = [Player(name, 'Player') for name in player_names]
         self._discard_pile = DiscardPile()
         self._log_directory = "./logs"
+        self._losses = dict()
         self._wins = dict()
         for player in self.players:
             self._wins[player] = 0
+            self._losses[player] = 0
         self._init_logger(console_log_level, file_log_level)
         self._logger = logging.getLogger('bj')
 
@@ -55,6 +57,11 @@ class Blackjack():
     def discard_pile(self):
         """ Returns the discard pile of the current game """
         return self._discard_pile
+
+    @property
+    def losses(self):
+        """ Returns a dictionary with the number of losses"""
+        return self._losses
 
     @property
     def players(self):
@@ -129,13 +136,12 @@ class Blackjack():
         """ Settle the bets at the end of the round. Pay winners, take loser's bets and push equal hands """
         dealer = self.dealer
         for player in reversed(self.players):
-            if player.hand.value == 21 and len(player.hand) == 2:
+            if player.hand is None:
+                player.losses += 1
+            elif player.hand.value == 21 and len(player.hand) == 2:
                 self._logger.info(f"*** {player} wins ${player.hand.bet.amount} with a Natural! ***")
                 player.bankroll.amount += player.hand.bet.amount * 2.5
-                player.wins += 1
-            if player.hand is None:
-                self._logger.info(f"*** {player} loses ${player.hand.bet.amount}! ***")
-                player.losses += 1
+                self.wins[player] += 1
             elif player.hand.value > dealer.hand.value:
                 self._logger.info(f"*** {player} wins ${player.hand.bet.amount}! ***")
                 player.bankroll.invest(player.hand.bet.amount * 2)
@@ -145,8 +151,8 @@ class Blackjack():
                 player.bankroll += player.hand.bet
 
             else:
-                self._logger.info(f"*** {player} loses ${player.hand.bet}! ***")
-                player.losses += 1
+                self._logger.info(f"*** {player} loses ${player.hand.bet.amount}! ***")
+                self.losses[player] += 1
             self._logger.info("\n")
 
     def take_bets(self):
