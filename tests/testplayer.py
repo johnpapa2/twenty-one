@@ -10,7 +10,6 @@ import unittest
 
 from players.player import Player
 from cards.bjcard import BjCard
-from click.testing import CliRunner
 
 
 class TestPlayer(unittest.TestCase):

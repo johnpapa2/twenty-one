@@ -8,8 +8,6 @@ This work is licensed under the MIT License.
 """
 import logging
 
-from .bjcard import BjCard
-
 
 class DiscardPile():
     """ This is a class for a discard pile used in any card game.

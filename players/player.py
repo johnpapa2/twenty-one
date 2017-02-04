@@ -8,7 +8,6 @@ This work is licensed under the MIT License.
 """
 import logging
 
-from .bet import Bet
 from .bankroll import Bankroll
 from .bjhand import BjHand
 

@@ -13,7 +13,6 @@ import uuid
 
 from cards.shoe import Shoe
 from cards.discardpile import DiscardPile
-from players.bjhand import BjHand
 from players.player import Player
 
 
