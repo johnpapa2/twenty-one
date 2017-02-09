@@ -92,9 +92,8 @@ class Player():
             self.receives(shoe.deal_card())
             self._logger.info(self.display_hand())
             if self.hand.value > 21:
-                self.busted = True
                 self._logger.info(f"{self} Busted!")
-            self._logger.info(f"*** {self} loses ${self.hand.bet.amount}! ***")
+                self._logger.info(f"*** {self} loses ${self.hand.bet.amount}! ***")
         else:
             return
         self._logger.info(f"{self}'s hand value is {self.hand.value}")
@@ -109,9 +108,9 @@ class Player():
         self.receives(shoe.deal_card())
         self._logger.info(self.display_hand())
         if self.hand.value > 21:
-            self.busted = True
             self._logger.info(f"{self} Busted!")
-            self._logger.info(f"*** {self} loses ${self.hand.bet.amount}! ***")
+            if self.role == 'Player':
+                self._logger.info(f"*** {self} loses ${self.hand.bet.amount}! ***")
         self._logger.info(f"{self}'s hand value is {self.hand.value}")
 
     def move(self, action, shoe):
@@ -141,10 +140,10 @@ class Player():
         Arguments:
             bet - The amount to bet on the new hand.
         """
-        self._logger.info(f"{self}'s bankroll is ${self.bankroll.amount}")
         self.bankroll.amount -= bet
         self._hand = BjHand(bet)
-        self._logger.info(f"{self} bets ${bet} dollars.")
+        if self.role == 'Player':
+            self._logger.info(f"{self} bets ${bet} dollars.")
 
     def receives(self, card):
         """ Adds a card to the player's hand

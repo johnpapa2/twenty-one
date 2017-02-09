@@ -82,19 +82,18 @@ class Blackjack():
     def deal_round(self):
         """ Deal a round of blackjack """
         self._logger.info("No more bets. Good luck.")
+        self.dealer.place_bet(0)
         for i in range(2):
             for player in self.players:
                 player.receives(self.shoe.deal_card())
-
-            self.dealer.place_bet(0)
             self.dealer.receives(self.shoe.deal_card())
-        self._logger
 
     def dealers_turn(self):
         """ Dealers turn """
         self._logger.info(self.dealer.display_hand())
-        action = click.prompt(f"{self.dealer}'s turn", default='stand')
-        self.dealer.move(action, self.shoe)
+        self._logger.info(f"{self.dealer}'s turn:")
+        while self.dealer.hand.value < 17:
+            self.dealer.move('hit', self.shoe)
         if self.dealer.hand.value > 21:
             self.discard_hand(self.dealer)
             self.dealer.busted = False
@@ -115,8 +114,9 @@ class Blackjack():
         else:
             for player in self.players:
                 if player.hand.value != 21:
-                    player.losses += 1
-        self.discard_hand(self.dealer)
+                    self.losses[player] += 1
+        if self.dealer.hand is not None:
+            self.discard_hand(self.dealer)
         for player in self.players:
             self.discard_hand(player)
 
@@ -126,21 +126,27 @@ class Blackjack():
         for player in self.players:
             self._logger.info(f"Dealer shows a [{self.dealer.hand[0].rank}]")
             self._logger.info(player.display_hand())
-            action = click.prompt(f'{player}, your turn', default='stand')
-            player.move(action, shoe)
-            if player.hand.value > 21:
-                self._logger.info(f"{player} busts!")
-                self.discard_hand(player)
+            action = 'hit'
+            while action == 'hit' and player.hand:
+                action = click.prompt(f'{player}, your turn', default='stand')
+                player.move(action, shoe)
+                if player.hand.value > 21:
+                    self._logger.info(f"{player} busts!")
+                    self.discard_hand(player)
 
     def settle(self):
         """ Settle the bets at the end of the round. Pay winners, take loser's bets and push equal hands """
         dealer = self.dealer
         for player in reversed(self.players):
             if player.hand is None:
-                player.losses += 1
+                self.losses[player] += 1
             elif player.hand.value == 21 and len(player.hand) == 2:
                 self._logger.info(f"*** {player} wins ${player.hand.bet.amount} with a Natural! ***")
-                player.bankroll.amount += player.hand.bet.amount * 2.5
+                player.bankroll.invest(player.hand.bet.amount * 2.5)
+                self.wins[player] += 1
+            elif player.hand is not None and dealer.hand is None:
+                self._logger.info(f"*** {player} wins ${player.hand.bet.amount}! ***")
+                player.bankroll.invest(player.hand.bet.amount * 2)
                 self.wins[player] += 1
             elif player.hand.value > dealer.hand.value:
                 self._logger.info(f"*** {player} wins ${player.hand.bet.amount}! ***")
@@ -148,7 +154,7 @@ class Blackjack():
                 self.wins[player] += 1
             elif player.hand.value == dealer.hand.value:
                 self._logger.info(f"*** {player} pushes! ***")
-                player.bankroll += player.hand.bet
+                player.bankroll.invest(player.hand.bet.amount)
 
             else:
                 self._logger.info(f"*** {player} loses ${player.hand.bet.amount}! ***")
@@ -158,6 +164,7 @@ class Blackjack():
     def take_bets(self):
         """ Give each player a chance to place a bet before dealing a round """
         for player in self.players:
+            self._logger.info(f"{player}'s bankroll is ${player.bankroll.amount}")
             bet_amount = click.prompt(f'{player}, please place bet', default=25)
             player.place_bet(bet_amount)
 

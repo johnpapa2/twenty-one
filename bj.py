@@ -33,9 +33,9 @@ def play_game(players, console, file):
         bj.play_round()
     for player in bj.players:
         logger.info("\n\n***** shoe summary *****")
-        logger.info(f"{player} won {player.wins} hands!")
-        logger.info(f"{player} lost {player.losses} hands!")
-        logger.info(f"{player} bankroll is ${player.bankroll}")
+        logger.info(f"{player} won {bj.wins[player]} hands!")
+        logger.info(f"{player} lost {bj.losses[player]} hands!")
+        logger.info(f"{player} bankroll is ${player.bankroll.amount}")
 
 if __name__ == '__main__':
     play_game()
