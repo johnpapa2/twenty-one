@@ -118,7 +118,8 @@ class Blackjack():
         if self.dealer.hand is not None:
             self.discard_hand(self.dealer)
         for player in self.players:
-            self.discard_hand(player)
+            if player.hand:
+                self.discard_hand(player)
 
     def players_turn(self):
         """ Players turn """
