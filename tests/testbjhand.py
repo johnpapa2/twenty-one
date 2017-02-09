@@ -14,12 +14,15 @@ from cards.bjcard import BjCard
 
 class TestBjHand(unittest.TestCase):
     def setUp(self):
-        self._hand = BjHand()
-        self._bet = 150
-        self._hand.bet = 150
+        self._hand = BjHand(150)
 
     def tearDown(self):
         pass
+
+    def test_bet(self):
+        """ Test hand has a bet """
+        hand = self._hand
+        self.assertEqual(hand.bet.amount, 150)
 
     def test_for_blackjack(self):
         """ Test bj hand can identify a natural blackjack """
@@ -36,6 +39,38 @@ class TestBjHand(unittest.TestCase):
         for card in cards:
             hand.add_card(card)
         self.assertEqual(hand.is_blackjack, False)
+
+    def test_for_splittable_hand(self):
+        """ Test bj hand can identify a hand that is allowed to be split """
+        hand = self._hand
+        cards = [BjCard('clubs', '5'), BjCard('diamonds', '5')]
+        for card in cards:
+            hand.add_card(card)
+        self.assertEqual(hand.can_split, True)
+
+    def test_for_splittable_hand_with_ten_value_cards(self):
+        """ Test bj hand can identify a hand that is allowed to be split """
+        hand = self._hand
+        cards = [BjCard('clubs', '10'), BjCard('diamonds', 'K')]
+        for card in cards:
+            hand.add_card(card)
+        self.assertEqual(hand.can_split, True)
+
+    def test_for_splittable_hand_with_aces(self):
+        """ Test bj hand can identify a hand that is allowed to be split """
+        hand = self._hand
+        cards = [BjCard('clubs', 'A'), BjCard('diamonds', 'A')]
+        for card in cards:
+            hand.add_card(card)
+        self.assertEqual(hand.can_split, True)
+
+    def test_for_non_splittable_hand(self):
+        """ Test bj hand can identify a hand that is not allowed to be split """
+        hand = self._hand
+        cards = [BjCard('clubs', '7'), BjCard('diamonds', '4')]
+        for card in cards:
+            hand.add_card(card)
+        self.assertEqual(hand.can_split, False)
 
     def test_value(self):
         """ Test bj hand returns the hand value """

@@ -8,6 +8,7 @@ Copyright 2016 John Papa.  All rights reserved.
 This work is licensed under the MIT License.
 """
 import click
+import logging
 
 from blackjack import Blackjack
 
@@ -24,9 +25,17 @@ def play_game(players, console, file):
     for player in range(players):
         player_names.append(click.prompt('Player name', default='John'))
     bj = Blackjack(player_names, console, file)
-    if click.confirm('Do you want to start game?', abort=True):
-        click.echo('Lets do it!')
-    bj.play()
+    logger = logging.getLogger('bj')
+    shoe = bj.shoe
+    shoe.shuffle()
+    bj.burn_a_card()
+    while len(shoe) > 3 * (len(bj.players) + 1):
+        bj.play_round()
+    for player in bj.players:
+        logger.info("\n\n***** shoe summary *****")
+        logger.info(f"{player} won {bj.wins[player]} hands!")
+        logger.info(f"{player} lost {bj.losses[player]} hands!")
+        logger.info(f"{player} bankroll is ${player.bankroll.amount}")
 
 if __name__ == '__main__':
     play_game()

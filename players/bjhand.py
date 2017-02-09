@@ -13,15 +13,39 @@ from .bet import Bet
 
 
 class BjHand(Hand):
+    """ This is a class for Hands used in the game of Blackjack.
 
-    def __init__(self):
+    Hands from this class should work for any standard game of blackjack or twenty-one.
+
+    """
+    def __init__(self, bet):
+        """ Initialize the hand as an empty list of cards and a bet
+
+        Arguments:
+            bet - The amount to bet before recieving cards for the hand
+        """
         super().__init__()
-        self.bet = Bet()
+        self._bet = Bet(bet)
         self._blackjack = None
         self._logger = logging.getLogger('bj')
 
     @property
+    def bet(self):
+        """ Returns the bet associated with this hand """
+        return self._bet
+
+    @property
+    def can_split(self):
+        """ Checks to see if a hand can be split into two hands """
+        splittable = False
+        if len(self) == 2:
+            if self.cards[0].value == self.cards[1].value:
+                splittable = True
+        return splittable
+
+    @property
     def is_blackjack(self):
+        """ Checks to see if the hand is a Natural Blackjack """
         if self._blackjack:
             return self._blackjack
         else:
@@ -34,12 +58,12 @@ class BjHand(Hand):
     @property
     def value(self):
         """ Return the value of the hand """
-        value = sum(card.value for card in self._cards)
+        value = sum(card.value for card in self.cards)
         if value > 21:
-            for card in self._cards:
+            for card in self.cards:
                 if card.rank == 'A' and card.value == 11:
                     card.set_ace_low()
-                    value = sum(card.value for card in self._cards)
+                    value = sum(card.value for card in self.cards)
                 if value <= 21:
                     break
         return value
