@@ -24,22 +24,22 @@ class TestShoe(unittest.TestCase):
         self.assertEqual(len(shoe), 52)
 
     def test_shoe_length_double_deck(self):
-        """ Test shoe is the correct length for a single deck """
+        """ Test shoe is the correct length for a double deck """
         shoe = Shoe(2)
         self.assertEqual(len(shoe), 104)
 
     def test_shoe_length_four_deck(self):
-        """ Test shoe is the correct length for a single deck """
+        """ Test shoe is the correct length for four decks """
         shoe = Shoe(4)
         self.assertEqual(len(shoe), 208)
 
     def test_shoe_length_six_deck(self):
-        """ Test shoe is the correct length for a single deck """
+        """ Test shoe is the correct length for six decks """
         shoe = Shoe(6)
         self.assertEqual(len(shoe), 312)
 
     def test_shoe_length_eight_deck(self):
-        """ Test shoe is the correct length for a single deck """
+        """ Test shoe is the correct length for eight decks """
         shoe = Shoe(8)
         self.assertEqual(len(shoe), 416)
 
