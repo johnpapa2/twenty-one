@@ -8,7 +8,7 @@ This work is licensed under the MIT License.
 """
 import unittest
 
-from cards.shoe import Shoe
+from cards import Shoe
 
 
 class TestShoe(unittest.TestCase):

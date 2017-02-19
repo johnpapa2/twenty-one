@@ -8,8 +8,8 @@ This work is licensed under the MIT License.
 """
 import unittest
 
-from players.hand import Hand
-from cards.bjcard import BjCard
+from players import Hand
+from cards import BjCard
 
 
 class TestHand(unittest.TestCase):

@@ -8,7 +8,7 @@ This work is licensed under the MIT License.
 """
 import unittest
 
-from cards.bjcard import BjCard
+from cards import BjCard
 
 
 class TestBjCard(unittest.TestCase):
