@@ -11,9 +11,11 @@ import logging
 import os
 import uuid
 
-from cards.shoe import Shoe
-from cards.discardpile import DiscardPile
-from players.player import Player
+from cards import Shoe
+from cards import DiscardPile
+from players import Player
+from sqlalchemy.orm import sessionmaker
+from db import models, cardmodels, bjmodels
 
 
 class Blackjack():
@@ -42,6 +44,9 @@ class Blackjack():
             self._losses[player] = 0
         self._init_logger(console_log_level, file_log_level)
         self._logger = logging.getLogger('bj')
+        engine = models.db_connect()
+        DBSession = sessionmaker(bind=engine)
+        self._session = DBSession()
 
     @property
     def dealer(self):
