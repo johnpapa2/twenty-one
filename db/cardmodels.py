@@ -8,7 +8,7 @@ This work is licensed under the MIT License.
 """
 from sqlalchemy import Column, ForeignKey, Integer, String, Boolean
 from sqlalchemy.orm import relationship
-from models import DeclarativeBase
+from db.models import DeclarativeBase
 
 
 class Rank(DeclarativeBase):

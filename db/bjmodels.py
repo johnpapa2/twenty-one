@@ -8,8 +8,8 @@ This work is licensed under the MIT License.
 """
 from sqlalchemy import Column, ForeignKey, Integer, String, Boolean
 from sqlalchemy.orm import relationship
-from models import DeclarativeBase
-from cardmodels import Card
+from db.models import DeclarativeBase
+from db.cardmodels import Card
 
 
 class Player(DeclarativeBase):
@@ -57,4 +57,3 @@ class HandElement(DeclarativeBase):
     action_id = Column(Integer, ForeignKey('action.id'))
     action = relationship(Action)
     order = Column(Integer)
-
