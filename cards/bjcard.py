@@ -43,7 +43,7 @@ class BjCard(Card):
             self._value = 10
         elif self.rank == ace_rank:
             self._value = 11
-        self._logger.info(f"My {self} is worth {self._value} points")
+        self._logger.debug(f"My {self} is worth {self._value} points")
         return self._value
 
     def set_ace_low(self):

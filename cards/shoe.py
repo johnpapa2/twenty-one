@@ -66,9 +66,7 @@ class Shoe():
 
     def _add_shoe_to_db(self):
         for index, card in enumerate(self._cards):
-            print(f"Card name is {card}")
             db_card = self._session.query(db.Card).filter_by(name=str(card)).one()
-            print(f"DB card is {db_card.name} with id {db_card.id}")
             shoe_element = db.ShoeElement(order=index + 1, shoe_id=self._shoe.id, card_id=db_card.id)
             self._session.add(shoe_element)
             self._session.commit()

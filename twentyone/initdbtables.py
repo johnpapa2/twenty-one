@@ -97,14 +97,18 @@ class InitDbTables():
 
     def init_result(self):
         session = self._session
+        result_blackjack = db.Result(name='blackjack')
         result_win = db.Result(name='win')
         result_lose = db.Result(name='lose')
         result_push = db.Result(name='push')
         result_bust = db.Result(name='bust')
+        result_pat = db.Result(name='pat')
+        session.add(result_blackjack)
         session.add(result_win)
         session.add(result_lose)
         session.add(result_push)
         session.add(result_bust)
+        session.add(result_pat)
         session.commit()
 
     def init_suit_types(self):
