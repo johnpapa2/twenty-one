@@ -6,6 +6,7 @@ Created on Jan 15, 2017
 Copyright 2017 John Papa.  All rights reserved.
 This work is licensed under the MIT License.
 """
+import db
 import logging
 import random
 
@@ -18,22 +19,24 @@ class Shoe():
     A shoe from this class should work for any standard card game.
 
     """
-    def __init__(self, num_decks=1):
+    def __init__(self, session, num_decks=1):
         """ Initialize shoe with n number of decks, with each deck in standard 52 card new deck order
 
         Arguments:
             num_decks - The number of decks in the shoe.
         """
-        self._ranks = ['A'] + [str(n) for n in range(2, 11)] + ['J', 'Q', 'K']
-        self._suits = ['spades', 'diamonds', 'clubs', 'hearts']
+        self._session = session
         self._cards = list()
+        deck_of_cards = self._session.query(db.Card).all()
         for deck in range(num_decks):
-            # New decks of cards increase in rank from Ace (low) to King for two suits
-            self._cards += [BjCard(suit, rank) for suit in self._suits for rank in self._ranks if suit in ['spades', 'diamonds']]
-            # Then the ranks go in reverse for the other half of the deck
-            self._cards += [BjCard(suit, rank) for suit in self._suits for rank in reversed(self._ranks) if suit in ['clubs', 'hearts']]
+            for card in deck_of_cards:
+                self._cards.append(BjCard(session, card.suit.name, card.rank.name))
+
             self._logger = logging.getLogger('bj')
             self._logger.info("New deck of cards opened and spread")
+        self._shoe = db.Shoe(number_of_decks=num_decks)
+        session.add(self._shoe)
+        session.commit()
 
     def __getitem__(self, position):
         """ Return the card at a given position
@@ -59,3 +62,13 @@ class Shoe():
         #       This will be useful for shuffle tracking simulations
         random.shuffle(self._cards)
         self._logger.info("Now's a good time to take a break while I shuffle")
+        self._add_shoe_to_db()
+
+    def _add_shoe_to_db(self):
+        for index, card in enumerate(self._cards):
+            print(f"Card name is {card}")
+            db_card = self._session.query(db.Card).filter_by(name=str(card)).one()
+            print(f"DB card is {db_card.name} with id {db_card.id}")
+            shoe_element = db.ShoeElement(order=index + 1, shoe_id=self._shoe.id, card_id=db_card.id)
+            self._session.add(shoe_element)
+            self._session.commit()

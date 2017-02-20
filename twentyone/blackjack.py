@@ -6,6 +6,7 @@ Created on Dec 24, 2016
 Copyright 2016 John Papa.  All rights reserved.
 This work is licensed under the MIT License.
 """
+import db
 import click
 import logging
 import os
@@ -32,9 +33,12 @@ class Blackjack():
             console_log_level - The log level for stdout
             file_log_level - The log level used for writing to the log file.
         """
-        self._shoe = Shoe()
-        self._dealer = Player('Mora', 'Dealer')
-        self._players = [Player(name, 'Player') for name in player_names]
+        engine = models.db_connect()
+        DBSession = sessionmaker(bind=engine)
+        self._session = DBSession()
+        self._shoe = Shoe(self._session, 1)
+        self._dealer = Player(self._session, 'Mora', 'Dealer')
+        self._players = [Player(self._session, name, 'Player') for name in player_names]
         self._discard_pile = DiscardPile()
         self._log_directory = "./logs"
         self._losses = dict()
@@ -44,9 +48,6 @@ class Blackjack():
             self._losses[player] = 0
         self._init_logger(console_log_level, file_log_level)
         self._logger = logging.getLogger('bj')
-        engine = models.db_connect()
-        DBSession = sessionmaker(bind=engine)
-        self._session = DBSession()
 
     @property
     def dealer(self):
@@ -90,8 +91,8 @@ class Blackjack():
         self.dealer.place_bet(0)
         for i in range(2):
             for player in self.players:
-                player.receives(self.shoe.deal_card())
-            self.dealer.receives(self.shoe.deal_card())
+                player.receives('dealt', self.shoe.deal_card())
+            self.dealer.receives('dealt', self.shoe.deal_card())
 
     def dealers_turn(self):
         """ Dealers turn """
@@ -125,6 +126,9 @@ class Blackjack():
         for player in self.players:
             if player.hand:
                 self.discard_hand(player)
+            db_player = self._session.query(db.Player).filter_by(name=player.name).one()
+            db_player.bankroll = player.bankroll.amount
+            self._session.commit()
 
     def players_turn(self):
         """ Players turn """
@@ -146,7 +150,7 @@ class Blackjack():
         for player in reversed(self.players):
             if player.hand is None:
                 self.losses[player] += 1
-            elif player.hand.value == 21 and len(player.hand) == 2:
+            elif player.hand.is_blackjack:
                 self._logger.info(f"*** {player} wins ${player.hand.bet.amount} with a Natural! ***")
                 player.bankroll.invest(player.hand.bet.amount * 2.5)
                 self.wins[player] += 1

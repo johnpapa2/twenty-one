@@ -50,7 +50,6 @@ class Shoe(DeclarativeBase):
     """A Shoe is a collection of cards"""
     __tablename__ = 'shoe'
     id = Column(Integer, primary_key=True)
-    name = Column(String, nullable=False)
     number_of_decks = Column(Integer)
 
 
@@ -58,8 +57,8 @@ class ShoeElement(DeclarativeBase):
     """A Shoe element is a card in a hand"""
     __tablename__ = 'shoe_element'
     id = Column(Integer, primary_key=True)
+    order = Column(Integer)
     shoe_id = Column(Integer, ForeignKey('shoe.id'))
     shoe = relationship(Shoe)
     card_id = Column(Integer, ForeignKey('card.id'))
     card = relationship(Card)
-    order = Column(Integer)

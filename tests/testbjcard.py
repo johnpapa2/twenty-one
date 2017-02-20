@@ -25,17 +25,17 @@ class TestBjCard(unittest.TestCase):
 
     def test_value_face(self):
         """ Test blackjack card has correct value for face cards J Q K. """
-        card = BjCard('spades', 'J')
+        card = BjCard('spades', 'Jack')
         self.assertEqual(card.value, 10)
 
     def test_value_ace(self):
         """ Test blackjack card has correct value for card rank Ace. """
-        card = BjCard('spades', 'A')
+        card = BjCard('spades', 'Ace')
         self.assertEqual(card.value, 11)
 
     def test_set_ace_low(self):
         """ Test blackjack card can set an Ace to a value of 1. """
-        card = BjCard('spades', 'A')
+        card = BjCard('spades', 'Ace')
         self.assertEqual(card.value, 11)
         card.set_ace_low()
         self.assertEqual(card.value, 1)
