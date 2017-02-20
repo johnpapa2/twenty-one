@@ -34,8 +34,8 @@ class Shoe():
 
             self._logger = logging.getLogger('bj')
             self._logger.info("New deck of cards opened and spread")
-        self._shoe = db.Shoe(number_of_decks=num_decks)
-        session.add(self._shoe)
+        self._db_info = db.Shoe(number_of_decks=num_decks)
+        session.add(self._db_info)
         session.commit()
 
     def __getitem__(self, position):
@@ -49,6 +49,11 @@ class Shoe():
     def __len__(self):
         """ Return the number of cards in the shoe """
         return len(self._cards)
+
+    @property
+    def db_info(self):
+        """ Returns the db object associated with this shoe """
+        return self._db_info
 
     def deal_card(self):
         """ Remove the top card from the shoe and return it """
@@ -67,6 +72,6 @@ class Shoe():
     def _add_shoe_to_db(self):
         for index, card in enumerate(self._cards):
             db_card = self._session.query(db.Card).filter_by(name=str(card)).one()
-            shoe_element = db.ShoeElement(order=index + 1, shoe_id=self._shoe.id, card_id=db_card.id)
+            shoe_element = db.ShoeElement(order=index + 1, shoe_id=self._db_info.id, card_id=db_card.id)
             self._session.add(shoe_element)
             self._session.commit()

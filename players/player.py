@@ -28,12 +28,13 @@ class Player():
         """
         self._session = session
         print(f"Session is {self._session}")
-        self._db_player = self._session.query(db.Player).filter_by(name=name).one()
-        print(f"From DB: {self._db_player.role} {self._db_player.name} has {self._db_player.bankroll} in bankroll")
-        self._bankroll = Bankroll(self._db_player.bankroll)
+        self._db_info = self._session.query(db.Player).filter_by(name=name).one()
+        print(f"From DB: {self._db_info.role} {self._db_info.name} has {self._db_info.bankroll} in bankroll")
+        self._bankroll = Bankroll(self._db_info.bankroll)
         self._hand = None
-        self._name = self._db_player.name
-        self._role = self._db_player.role
+        self._name = self._db_info.name
+        self._participant_id = None
+        self._role = self._db_info.role
         self._logger = logging.getLogger('bj')
         if role == 'Dealer':
             self._logger.info(f"{self} taps into table")
@@ -50,6 +51,11 @@ class Player():
     def bankroll(self):
         """ Returns the player's bankroll """
         return self._bankroll
+
+    @property
+    def db_info(self):
+        """ Returns the db object associated with this player """
+        return self._db_info
 
     @property
     def hand(self):
@@ -69,6 +75,20 @@ class Player():
     def name(self):
         """ Returns the player's name """
         return self._name
+
+    @property
+    def participant_id(self):
+        """ Returns the player's participant id from the Participant db table """
+        return self._participant_id
+
+    @participant_id.setter
+    def participant_id(self, participant_id):
+        """ Set the player's participant id to participant_id
+
+        Arguments:
+            participant_id - The new ID to set the player's participant ID to.
+        """
+        self._participant_id = participant_id
 
     @property
     def role(self):
@@ -148,7 +168,7 @@ class Player():
             bet - The amount to bet on the new hand.
         """
         self.bankroll.amount -= bet
-        self._hand = BjHand(self._session, self._db_player.id, bet)
+        self._hand = BjHand(self._session, bet)
         if self.role == 'Player':
             self._logger.info(f"{self} bets ${bet} dollars.")
 

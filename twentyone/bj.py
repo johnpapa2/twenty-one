@@ -36,6 +36,7 @@ def play_game(players, console, file):
         logger.info(f"{player} won {bj.wins[player]} hands!")
         logger.info(f"{player} lost {bj.losses[player]} hands!")
         logger.info(f"{player} bankroll is ${player.bankroll.amount}")
+    bj.end_game()
 
 if __name__ == '__main__':
     play_game()

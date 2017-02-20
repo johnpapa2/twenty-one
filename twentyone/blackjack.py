@@ -6,6 +6,7 @@ Created on Dec 24, 2016
 Copyright 2016 John Papa.  All rights reserved.
 This work is licensed under the MIT License.
 """
+import datetime
 import db
 import click
 import logging
@@ -42,10 +43,27 @@ class Blackjack():
         self._discard_pile = DiscardPile()
         self._log_directory = "./logs"
         self._losses = dict()
+        self._round = None
         self._wins = dict()
+        self._results = {result.name: result.id for result in self._session.query(db.Result).all()}
+        self._game = db.Game(start_time=datetime.datetime.now(),
+                             number_of_players=len(self._players),
+                             shoe_id=self.shoe.db_info.id)
+        self._session.add(self._game)
+        self._session.commit()
+        spot = 0
+        participant = db.Participant(spot=spot, game_id=self._game.id, player_id=self._dealer.db_info.id)
+        self._session.add(participant)
+        self._session.commit()
+        self._dealer.participant_id = participant.id
         for player in self.players:
+            spot += 1
             self._wins[player] = 0
             self._losses[player] = 0
+            participant = db.Participant(spot=spot, game_id=self._game.id, player_id=player.db_info.id)
+            self._session.add(participant)
+            self._session.commit()
+            player.participant_id = participant.id
         self._init_logger(console_log_level, file_log_level)
         self._logger = logging.getLogger('bj')
 
@@ -98,19 +116,46 @@ class Blackjack():
         """ Dealers turn """
         self._logger.info(self.dealer.display_hand())
         self._logger.info(f"{self.dealer}'s turn:")
+        self.dealer.hand.db_info.round_id = self._round.id
+        self.dealer.hand.db_info.participant_id = self.dealer.participant_id
+        self._session.commit()
         while self.dealer.hand.value < 17:
             self.dealer.move('hit', self.shoe)
+        self.dealer.hand.db_info.total = self.dealer.hand.value
         if self.dealer.hand.value > 21:
+            self.dealer.hand.db_info.result_id = self._results['bust']
+            dealer_outcome = db.DealerOutcome(hand_total=self.dealer.hand.value,
+                                              soft_hand=False,
+                                              result_id=self._results['bust'])
             self.discard_hand(self.dealer)
             self.dealer.busted = False
+        else:
+            self.dealer.hand.db_info.result_id = self._results['pat']
+            dealer_outcome = db.DealerOutcome(hand_total=self.dealer.hand.value, result_id=self._results['pat'])
+        self._session.add(dealer_outcome)
+        self._session.commit()
+        self._round.dealer_outcome_id = dealer_outcome.id
+        self._session.commit()
 
     def discard_hand(self, player):
         """ Move the players hand to the discard pile """
         for card in player.discard_hand():
             self.discard_pile.receives(card)
 
+    def end_game(self):
+        """ Log the end time of the game """
+        self._game.end_time = datetime.datetime.now()
+        self._session.commit()
+        self._session.close()
+
     def play_round(self):
         """ Play a round of blackjack, from Players placing bets until bets are settled """
+        self._round = db.Round(start_time=datetime.datetime.now(),
+                         number_of_players=len(self.players),
+                         game_id=self._game.id)
+        self._session.add(self._round)
+        self._session.commit()
+
         self.take_bets()
         self.deal_round()
         if not self.dealer.hand.is_blackjack:
@@ -118,9 +163,30 @@ class Blackjack():
             self.dealers_turn()
             self.settle()
         else:
+            dealer_outcome = db.DealerOutcome(hand_total=21, soft_hand=True, result_id=self._results['blackjack'])
+            self._session.add(dealer_outcome)
+            self._session.commit()
+            self._round.dealer_outcome_id = dealer_outcome.id
+            self._session.commit()
+            self._logger.info(f"Dealer shows a [{self.dealer.hand[0].rank}]")
             for player in self.players:
-                if player.hand.value != 21:
+                self._logger.info(player.display_hand())
+                player.hand.db_info.round_id = self._round.id
+                player.hand.db_info.participant_id = player.participant_id
+                player.hand.db_info.total = player.hand.value
+                if not player.hand.is_blackjack:
                     self.losses[player] += 1
+                    player.hand.db_info.result_id = self._results['lose']
+                else:
+                    player.hand.db_info.result_id = self._results['push']
+                self._session.commit()
+            self._logger.info(f"Dealer has a Blackjack!")
+            self._logger.info(self.dealer.display_hand())
+            self.dealer.hand.db_info.result_id = self._results['blackjack']
+            self.dealer.hand.db_info.round_id = self._round.id
+            self.dealer.hand.db_info.participant_id = self.dealer.participant_id
+            self.dealer.hand.db_info.total = self.dealer.hand.value
+            self._session.commit()
         if self.dealer.hand is not None:
             self.discard_hand(self.dealer)
         for player in self.players:
@@ -129,20 +195,32 @@ class Blackjack():
             db_player = self._session.query(db.Player).filter_by(name=player.name).one()
             db_player.bankroll = player.bankroll.amount
             self._session.commit()
+        self._round.end_time = datetime.datetime.now()
+        self._session.commit()
 
     def players_turn(self):
         """ Players turn """
         shoe = self.shoe
         for player in self.players:
+            player.hand.db_info.round_id = self._round.id
+            player.hand.db_info.participant_id = player.participant_id
+            self._session.commit()
             self._logger.info(f"Dealer shows a [{self.dealer.hand[0].rank}]")
             self._logger.info(player.display_hand())
-            action = 'hit'
-            while action == 'hit' and player.hand:
-                action = click.prompt(f'{player}, your turn', default='stand')
-                player.move(action, shoe)
-                if player.hand.value > 21:
-                    self._logger.info(f"{player} busts!")
-                    self.discard_hand(player)
+            if player.hand.is_blackjack:
+                player.hand.db_info.is_blackjack = True
+                self._session.commit()
+            else:
+                action = 'hit'
+                while action == 'hit' and player.hand:
+                    action = click.prompt(f'{player}, your turn', default='stand')
+                    player.move(action, shoe)
+                    if player.hand.value > 21:
+                        player.hand.db_info.result_id = self._results['bust']
+                        player.hand.db_info.total = player.hand.value
+                        self._session.commit()
+                        self._logger.info(f"{player} busts!")
+                        self.discard_hand(player)
 
     def settle(self):
         """ Settle the bets at the end of the round. Pay winners, take loser's bets and push equal hands """
@@ -151,24 +229,34 @@ class Blackjack():
             if player.hand is None:
                 self.losses[player] += 1
             elif player.hand.is_blackjack:
+                player.hand.db_info.result_id = self._results['blackjack']
+                player.hand.db_info.total = player.hand.value
                 self._logger.info(f"*** {player} wins ${player.hand.bet.amount} with a Natural! ***")
                 player.bankroll.invest(player.hand.bet.amount * 2.5)
                 self.wins[player] += 1
             elif player.hand is not None and dealer.hand is None:
+                player.hand.db_info.result_id = self._results['win']
+                player.hand.db_info.total = player.hand.value
                 self._logger.info(f"*** {player} wins ${player.hand.bet.amount}! ***")
                 player.bankroll.invest(player.hand.bet.amount * 2)
                 self.wins[player] += 1
             elif player.hand.value > dealer.hand.value:
+                player.hand.db_info.result_id = self._results['win']
+                player.hand.db_info.total = player.hand.value
                 self._logger.info(f"*** {player} wins ${player.hand.bet.amount}! ***")
                 player.bankroll.invest(player.hand.bet.amount * 2)
                 self.wins[player] += 1
             elif player.hand.value == dealer.hand.value:
+                player.hand.db_info.result_id = self._results['push']
+                player.hand.db_info.total = player.hand.value
                 self._logger.info(f"*** {player} pushes! ***")
                 player.bankroll.invest(player.hand.bet.amount)
-
             else:
+                player.hand.db_info.result_id = self._results['lose']
+                player.hand.db_info.total = player.hand.value
                 self._logger.info(f"*** {player} loses ${player.hand.bet.amount}! ***")
                 self.losses[player] += 1
+            self._session.commit()
             self._logger.info("\n")
 
     def take_bets(self):

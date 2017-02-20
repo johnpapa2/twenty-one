@@ -6,7 +6,7 @@ Created on Feb 18, 2017
 Copyright 2017 John Papa.  All rights reserved.
 This work is licensed under the MIT License.
 """
-from sqlalchemy import Column, ForeignKey, Integer, String, Boolean, DateTime
+from sqlalchemy import Column, ForeignKey, Boolean, DateTime, Float, Integer, String
 from sqlalchemy.orm import relationship
 from db.models import DeclarativeBase
 from db import Card
@@ -19,7 +19,7 @@ class Player(DeclarativeBase):
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
     role = Column(String, nullable=False)
-    bankroll = Column(Integer)
+    bankroll = Column(Float)
 
 
 class Action(DeclarativeBase):
@@ -40,7 +40,6 @@ class DealerOutcome(DeclarativeBase):
     """A Dealer Outcome is a the dealer's outcome of a hand"""
     __tablename__ = 'dealer_outcome'
     id = Column(Integer, primary_key=True)
-    name = Column(String, nullable=False)
     hand_total = Column(Integer)
     soft_hand = Column(Boolean)
     result_id = Column(Integer, ForeignKey('result.id'))
@@ -49,7 +48,7 @@ class DealerOutcome(DeclarativeBase):
 
 class Game(DeclarativeBase):
     """A Game is the game of blackjack played for a single shoe"""
-    __tablename__ = 'match'
+    __tablename__ = 'game'
     id = Column(Integer, primary_key=True)
     start_time = Column(DateTime)
     end_time = Column(DateTime)
@@ -84,7 +83,7 @@ class Round(DeclarativeBase):
 
 class RoundOrder(DeclarativeBase):
     """A Round Order is the players of single round of Blackjack"""
-    __tablename__ = 'round'
+    __tablename__ = 'round_order'
     id = Column(Integer, primary_key=True)
     spot = Column(Integer)
     participant_id = Column(Integer, ForeignKey('participant.id'))
@@ -99,6 +98,7 @@ class Hand(DeclarativeBase):
     id = Column(Integer, primary_key=True)
     bet = Column(Integer)
     is_blackjack = Column(Boolean)
+    total = Column(Integer)
     participant_id = Column(Integer, ForeignKey('participant.id'))
     participant = relationship(Participant)
     result_id = Column(Integer, ForeignKey('result.id'))

@@ -19,7 +19,7 @@ class BjHand(Hand):
     Hands from this class should work for any standard game of blackjack or twenty-one.
 
     """
-    def __init__(self, session, player_id, bet):
+    def __init__(self, session, bet):
         """ Initialize the hand as an empty list of cards and a bet
 
         Arguments:
@@ -29,7 +29,7 @@ class BjHand(Hand):
         self._session = session
         self._bet = Bet(bet)
         self._blackjack = None
-        self._db_info = db.Hand(bet=bet, player_id=player_id)
+        self._db_info = db.Hand(bet=bet)
         self._session.add(self._db_info)
         self._session.commit()
         self._logger = logging.getLogger('bj')
@@ -50,7 +50,7 @@ class BjHand(Hand):
 
     @property
     def db_info(self):
-        """ Returns the db info associated with this hand """
+        """ Returns the db object associated with this hand """
         return self._db_info
 
     @property
@@ -64,6 +64,7 @@ class BjHand(Hand):
             else:
                 self._blackjack = False
         self._db_info.is_blackjack = self._blackjack
+        self._session.commit()
         return self._blackjack
 
     @property
