@@ -68,6 +68,14 @@ class BjHand(Hand):
         return self._blackjack
 
     @property
+    def is_soft(self):
+        """ Checks to see if the hand is soft """
+        if any([card for card in self.cards if card.rank == 'Ace' and card.value == 11]):
+            return True
+        else:
+            return False
+
+    @property
     def value(self):
         """ Return the value of the hand """
         value = sum(card.value for card in self.cards)

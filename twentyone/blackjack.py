@@ -132,13 +132,15 @@ class Blackjack():
         if self.dealer.hand.value > 21:
             self.dealer.hand.db_info.result_id = self._results['bust']
             dealer_outcome = db.DealerOutcome(hand_total=self.dealer.hand.value,
-                                              soft_hand=False,
+                                              soft_hand=self.dealer.hand.is_soft,
                                               result_id=self._results['bust'])
             self.discard_hand(self.dealer)
             self.dealer.busted = False
         else:
             self.dealer.hand.db_info.result_id = self._results['pat']
-            dealer_outcome = db.DealerOutcome(hand_total=self.dealer.hand.value, result_id=self._results['pat'])
+            dealer_outcome = db.DealerOutcome(hand_total=self.dealer.hand.value,
+                                              soft_hand=self.dealer.hand.is_soft,
+                                              result_id=self._results['pat'])
         self._session.add(dealer_outcome)
         self._session.commit()
         self._round.dealer_outcome_id = dealer_outcome.id
