@@ -33,7 +33,9 @@ class InitDbTables():
         self.init_cards()
         self.init_action()
         self.init_result()
+        self.init_bankroll()
         self.init_player()
+        self.init_strategy()
 
     def init_action(self):
         session = self._session
@@ -49,6 +51,14 @@ class InitDbTables():
         session.add(action_double)
         session.add(action_split)
         session.add(action_surrender)
+        session.commit()
+
+    def init_bankroll(self):
+        session = self._session
+        dealer = db.Bankroll(value=0)
+        john = db.Bankroll(value=1000)
+        session.add(dealer)
+        session.add(john)
         session.commit()
 
     def init_cards(self, suit='French'):
@@ -72,8 +82,8 @@ class InitDbTables():
 
     def init_player(self):
         session = self._session
-        player = db.Player(name='John', role='Player', bankroll=1000)
-        dealer = db.Player(name='Mora', role='Dealer', bankroll=0)
+        player = db.Player(name='John', role='Player', bankroll_id=2)
+        dealer = db.Player(name='Mora', role='Dealer', bankroll_id=1)
         session.add(player)
         session.add(dealer)
         session.commit()
@@ -109,6 +119,18 @@ class InitDbTables():
         session.add(result_push)
         session.add(result_bust)
         session.add(result_pat)
+        session.commit()
+
+    def init_strategy(self):
+        session = self._session
+        dealer = db.Strategy(name='dealer')
+        stand = db.Strategy(name='stand')
+        mimic_dealer = db.Strategy(name='mimic_dealer')
+        no_bust = db.Strategy(name='no_bust')
+        session.add(dealer)
+        session.add(stand)
+        session.add(mimic_dealer)
+        session.add(no_bust)
         session.commit()
 
     def init_suit_types(self):

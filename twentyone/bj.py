@@ -16,15 +16,18 @@ from blackjack import Blackjack
 @click.command()
 @click.option('--players', default=1, type=click.IntRange(1, 7), help='Number of players.')
 @click.option('--matches', default=1, help='Number of shoes to play.')
+@click.option('--strategy', default='no_bust', help='Playing strategy for the player.')
 @click.option('--console', default='info', help='Console logging level.')
 @click.option('--file', default='debug', help='File logging level.')
-def play_game(players, matches, console, file):
-    for _ in range(matches):
+def play_game(players, matches, strategy, console, file):
+    for i in range(matches):
         player_names = list()
         for player in range(players):
             #player_names.append(click.prompt('Player name', default='John'))
             player_names.append('John')
-        bj = Blackjack(player_names, console, file)
+        bj = Blackjack(player_names, strategy, console, file)
+        if i == 0:
+            bj.init_logger(console, file)
         logger = logging.getLogger('bj')
         shoe = bj.shoe
         shoe.shuffle()
@@ -35,7 +38,7 @@ def play_game(players, matches, console, file):
             logger.info("\n\n***** shoe summary *****")
             logger.info(f"{player} won {bj.wins[player]} hands!")
             logger.info(f"{player} lost {bj.losses[player]} hands!")
-            logger.info(f"{player} bankroll is ${player.bankroll.amount}")
+            logger.info(f"{player} bankroll is ${player.bankroll.amount}\n\n")
         bj.end_match()
 
 if __name__ == '__main__':

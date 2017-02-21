@@ -20,7 +20,7 @@ class Player():
     Players from this class should work for any standard game of blackjack or twenty-one.
 
     """
-    def __init__(self, session, name, role='Player'):
+    def __init__(self, session, name, role='Player', strategy=None):
         """ Initialize the player with a role and name.
 
         Arguments:
@@ -30,13 +30,13 @@ class Player():
         self._session = session
         self._db_info = self._session.query(db.Player).filter_by(name=name).one()
         if role == 'Player':
-            print(f"From DB: {self._db_info.role} {self._db_info.name} has {self._db_info.bankroll} in bankroll")
-        self._bankroll = Bankroll(self._db_info.bankroll)
+            print(f"From DB: {self._db_info.role} {self._db_info.name} has {self._db_info.bankroll.value} in bankroll")
+        self._bankroll = Bankroll(self._db_info.bankroll.value)
         self._hand = None
         self._name = self._db_info.name
         self._participant_id = None
         self._role = self._db_info.role
-        self._strategy = Strategy(self._session)
+        self._strategy = Strategy(session=self._session, name=strategy)
         self._logger = logging.getLogger('bj')
         if role == 'Dealer':
             self._logger.info(f"{self} taps into table")
@@ -168,16 +168,16 @@ class Player():
         self._logger.info(f"{self} stands!")
         self._logger.info(f"{self}'s hand value is {self.hand.value}")
 
-    def place_bet(self, bet):
+    def place_bet(self, units):
         """ Place's a bet before receiving a new hand
 
         Arguments:
-            bet - The amount to bet on the new hand.
+            units - The amount of units to bet on the new hand.
         """
-        self.bankroll.amount -= bet
-        self._hand = BjHand(self._session, bet)
+        #self.bankroll.amount -= bet
+        self._hand = BjHand(self._session, units)
         if self.role == 'Player':
-            self._logger.info(f"{self} bets ${bet} dollars.")
+            self._logger.info(f"{self} bets {units} units.")
             is_player = True
         else:
             is_player = False

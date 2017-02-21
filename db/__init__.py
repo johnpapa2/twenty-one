@@ -13,6 +13,7 @@ from .cardmodels import ShoeElement
 from .cardmodels import Suit
 from .cardmodels import SuitType
 from .bjmodels import Action
+from .bjmodels import Bankroll
 from .bjmodels import DealerOutcome
 from .bjmodels import Match
 from .bjmodels import Hand
@@ -22,3 +23,4 @@ from .bjmodels import Player
 from .bjmodels import Result
 from .bjmodels import Round
 from .bjmodels import RoundOrder
+from .bjmodels import Strategy

@@ -26,7 +26,7 @@ class Blackjack():
     This class should work for any standard game of blackjack or twenty-one.
 
     """
-    def __init__(self, player_names, console_log_level=None, file_log_level=None):
+    def __init__(self, player_names, strategy, console_log_level=None, file_log_level=None):
         """ Initialize the blackjack game
 
         Arguments:
@@ -38,8 +38,8 @@ class Blackjack():
         DBSession = sessionmaker(bind=engine)
         self._session = DBSession()
         self._shoe = Shoe(self._session, 1)
-        self._dealer = Player(self._session, 'Mora', 'Dealer')
-        self._players = [Player(self._session, name, 'Player') for name in player_names]
+        self._dealer = Player(self._session, name='Mora', role='Dealer', strategy='dealer')
+        self._players = [Player(self._session, name=name, role='Player', strategy=strategy) for name in player_names]
         self._discard_pile = DiscardPile()
         self._log_directory = "./logs"
         self._losses = dict()
@@ -52,7 +52,10 @@ class Blackjack():
         self._session.add(self._match)
         self._session.commit()
         spot = 0
-        participant = db.Participant(spot=spot, match_id=self._match.id, player_id=self._dealer.db_info.id)
+        participant = db.Participant(spot=spot,
+                                     match_id=self._match.id,
+                                     player_id=self.dealer.db_info.id,
+                                     strategy_id=self.dealer.strategy.db_info.id)
         self._session.add(participant)
         self._session.commit()
         self._dealer.participant_id = participant.id
@@ -60,11 +63,14 @@ class Blackjack():
             spot += 1
             self._wins[player] = 0
             self._losses[player] = 0
-            participant = db.Participant(spot=spot, match_id=self._match.id, player_id=player.db_info.id)
+            participant = db.Participant(spot=spot,
+                                         match_id=self._match.id,
+                                         player_id=player.db_info.id,
+                                         strategy_id=player.strategy.db_info.id)
             self._session.add(participant)
             self._session.commit()
             player.participant_id = participant.id
-        self._init_logger(console_log_level, file_log_level)
+        #self._init_logger(console_log_level, file_log_level)
         self._logger = logging.getLogger('bj')
         self._deck_of_cards = {card.name: card.id for card in self._session.query(db.Card).all()}
 
@@ -202,7 +208,7 @@ class Blackjack():
             if player.hand:
                 self.discard_hand(player)
             db_player = self._session.query(db.Player).filter_by(name=player.name).one()
-            db_player.bankroll = player.bankroll.amount
+            db_player.bankroll.value = player.bankroll.amount
             self._session.commit()
         self._round.end_time = datetime.datetime.now()
         self._session.commit()
@@ -241,30 +247,30 @@ class Blackjack():
             elif player.hand.is_blackjack:
                 player.hand.db_info.result_id = self._results['win']
                 player.hand.db_info.final_value = player.hand.value
-                self._logger.info(f"*** {player} wins ${player.hand.bet.amount} with a Natural! ***")
-                player.bankroll.invest(player.hand.bet.amount * 2.5)
+                self._logger.info(f"*** {player} wins {player.hand.bet.amount * 1.5} units with a Natural! ***")
+                #player.bankroll.invest(player.hand.bet.amount * 2.5)
                 self.wins[player] += 1
             elif player.hand is not None and dealer.hand is None:
                 player.hand.db_info.result_id = self._results['win']
                 player.hand.db_info.final_value = player.hand.value
-                self._logger.info(f"*** {player} wins ${player.hand.bet.amount}! ***")
-                player.bankroll.invest(player.hand.bet.amount * 2)
+                self._logger.info(f"*** {player} wins {player.hand.bet.amount} units! ***")
+                #player.bankroll.invest(player.hand.bet.amount * 2)
                 self.wins[player] += 1
             elif player.hand.value > dealer.hand.value:
                 player.hand.db_info.result_id = self._results['win']
                 player.hand.db_info.final_value = player.hand.value
-                self._logger.info(f"*** {player} wins ${player.hand.bet.amount}! ***")
-                player.bankroll.invest(player.hand.bet.amount * 2)
+                self._logger.info(f"*** {player} wins {player.hand.bet.amount} units! ***")
+                #player.bankroll.invest(player.hand.bet.amount * 2)
                 self.wins[player] += 1
             elif player.hand.value == dealer.hand.value:
                 player.hand.db_info.result_id = self._results['push']
                 player.hand.db_info.final_value = player.hand.value
                 self._logger.info(f"*** {player} pushes! ***")
-                player.bankroll.invest(player.hand.bet.amount)
+                #player.bankroll.invest(player.hand.bet.amount)
             else:
                 player.hand.db_info.result_id = self._results['lose']
                 player.hand.db_info.final_value = player.hand.value
-                self._logger.info(f"*** {player} loses ${player.hand.bet.amount}! ***")
+                self._logger.info(f"*** {player} loses {player.hand.bet.amount} units! ***")
                 self.losses[player] += 1
             self._session.commit()
             self._logger.info("\n")
@@ -277,7 +283,7 @@ class Blackjack():
             bet_amount = 5
             player.place_bet(bet_amount)
 
-    def _init_logger(self, console_log_level=None, file_log_level=None):
+    def init_logger(self, console_log_level=None, file_log_level=None):
         """ Initialize the log file and logger.
 
         Arguments:
