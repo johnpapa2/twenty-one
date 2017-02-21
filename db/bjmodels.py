@@ -13,13 +13,21 @@ from db import Card
 from db import Shoe
 
 
+class Bankroll(DeclarativeBase):
+    """An Bankroll is the money a player can use to make bets"""
+    __tablename__ = 'bankroll'
+    id = Column(Integer, primary_key=True)
+    value = Column(Float)
+
+
 class Player(DeclarativeBase):
     """A Player is an object with bets and hands"""
     __tablename__ = 'player'
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
     role = Column(String, nullable=False)
-    bankroll = Column(Float)
+    bankroll_id = Column(Integer, ForeignKey('bankroll.id'))
+    bankroll = relationship(Bankroll)
 
 
 class Action(DeclarativeBase):
@@ -57,6 +65,13 @@ class Match(DeclarativeBase):
     shoe = relationship(Shoe)
 
 
+class Strategy(DeclarativeBase):
+    """A Strategy is a strategy for making playing decisions"""
+    __tablename__ = 'strategy'
+    id = Column(Integer, primary_key=True)
+    name = Column(String, nullable=False)
+
+
 class Participant(DeclarativeBase):
     """A Participant is a player of a specific match"""
     __tablename__ = 'participant'
@@ -66,6 +81,8 @@ class Participant(DeclarativeBase):
     match = relationship(Match)
     player_id = Column(Integer, ForeignKey('player.id'))
     player = relationship(Player)
+    strategy_id = Column(Integer, ForeignKey('strategy.id'))
+    strategy = relationship(Strategy)
 
 
 class Round(DeclarativeBase):
@@ -94,11 +111,42 @@ class RoundOrder(DeclarativeBase):
     round = relationship(Round)
 
 
+class DealerHand(DeclarativeBase):
+    """A Hand is a collection of cards"""
+    __tablename__ = 'dealer_hand'
+    id = Column(Integer, primary_key=True)
+    is_blackjack = Column(Boolean)
+    final_value = Column(Integer)
+    start_value = Column(Integer)
+    up_card_id = Column(Integer, ForeignKey('card.id'))
+    up_card = relationship(Card)
+    # this participant ID will probably change to a Deler ID after I implent dealer class and db table
+    participant_id = Column(Integer, ForeignKey('participant.id'))
+    participant = relationship(Participant)
+    outcome_id = Column(Integer, ForeignKey('dealer_outcome.id'))
+    outcome = relationship(DealerOutcome)
+    round_id = Column(Integer, ForeignKey('round.id'))
+    round = relationship(Round)
+
+
+class DealerHandElement(DeclarativeBase):
+    """A Hand element is a card in a hand"""
+    __tablename__ = 'dealer_hand_element'
+    id = Column(Integer, primary_key=True)
+    order = Column(Integer)
+    hand_id = Column(Integer, ForeignKey('dealer_hand.id'))
+    hand = relationship(DealerHand)
+    card_id = Column(Integer, ForeignKey('card.id'))
+    card = relationship(Card)
+    action_id = Column(Integer, ForeignKey('action.id'))
+    action = relationship(Action)
+
+
 class Hand(DeclarativeBase):
     """A Hand is a collection of cards"""
     __tablename__ = 'hand'
     id = Column(Integer, primary_key=True)
-    bet = Column(Integer)
+    bet = Column(Float)
     is_blackjack = Column(Boolean)
     is_player = Column(Boolean)
     final_value = Column(Integer)
