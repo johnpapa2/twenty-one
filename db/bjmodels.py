@@ -46,9 +46,9 @@ class DealerOutcome(DeclarativeBase):
     result = relationship(Result)
 
 
-class Game(DeclarativeBase):
-    """A Game is the game of blackjack played for a single shoe"""
-    __tablename__ = 'game'
+class Match(DeclarativeBase):
+    """A Match is the game of blackjack played for a single shoe"""
+    __tablename__ = 'match'
     id = Column(Integer, primary_key=True)
     start_time = Column(DateTime)
     end_time = Column(DateTime)
@@ -58,12 +58,12 @@ class Game(DeclarativeBase):
 
 
 class Participant(DeclarativeBase):
-    """A Participant is a player of a specific game"""
+    """A Participant is a player of a specific match"""
     __tablename__ = 'participant'
     id = Column(Integer, primary_key=True)
     spot = Column(Integer)
-    game_id = Column(Integer, ForeignKey('game.id'))
-    game = relationship(Game)
+    match_id = Column(Integer, ForeignKey('match.id'))
+    match = relationship(Match)
     player_id = Column(Integer, ForeignKey('player.id'))
     player = relationship(Player)
 
@@ -74,11 +74,13 @@ class Round(DeclarativeBase):
     id = Column(Integer, primary_key=True)
     start_time = Column(DateTime)
     end_time = Column(DateTime)
+    dealer_up_card_id = Column(Integer, ForeignKey('card.id'))
+    dealer_up_card = relationship(Card)
     number_of_players = Column(Integer)
     dealer_outcome_id = Column(Integer, ForeignKey('dealer_outcome.id'))
     dealer_outcome = relationship(DealerOutcome)
-    game_id = Column(Integer, ForeignKey('game.id'))
-    game = relationship(Game)
+    match_id = Column(Integer, ForeignKey('match.id'))
+    match = relationship(Match)
 
 
 class RoundOrder(DeclarativeBase):
@@ -98,7 +100,8 @@ class Hand(DeclarativeBase):
     id = Column(Integer, primary_key=True)
     bet = Column(Integer)
     is_blackjack = Column(Boolean)
-    total = Column(Integer)
+    final_value = Column(Integer)
+    start_value = Column(Integer)
     participant_id = Column(Integer, ForeignKey('participant.id'))
     participant = relationship(Participant)
     result_id = Column(Integer, ForeignKey('result.id'))

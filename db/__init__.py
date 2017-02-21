@@ -14,7 +14,7 @@ from .cardmodels import Suit
 from .cardmodels import SuitType
 from .bjmodels import Action
 from .bjmodels import DealerOutcome
-from .bjmodels import Game
+from .bjmodels import Match
 from .bjmodels import Hand
 from .bjmodels import HandElement
 from .bjmodels import Participant

@@ -25,32 +25,32 @@ class Replay():
         self._session = DBSession()
 
     def replay_all(self):
-        games = self._session.query(db.Game).all()
-        for game in games:
-            self.replay_game(game)
+        matches = self._session.query(db.Match).all()
+        for match in matches:
+            self.replay_match(match)
             print("\n\n")
 
-    def replay_game(self, game):
-        game_header = f"Game {game.id} - start time: {game.start_time}"
-        print_break = "-" * len(game_header)
+    def replay_match(self, match):
+        match_header = f"Match {match.id} - start time: {match.start_time}"
+        print_break = "-" * len(match_header)
         print(print_break)
-        print(game_header)
+        print(match_header)
         print(print_break)
-        print(f"Number of players: {game.number_of_players}")
-        print(f"Shoe ID: {game.shoe.id}")
+        print(f"Number of players: {match.number_of_players}")
+        print(f"Shoe ID: {match.shoe.id}")
 
-        rounds = self._session.query(db.Round).filter_by(game_id=game.id).all()
+        rounds = self._session.query(db.Round).filter_by(match_id=match.id).all()
         for round in rounds:
             self.replay_round(round)
             print("\n")
 
-        print(f"end time: {game.end_time}")
+        print(f"end time: {match.end_time}")
 
     def replay_round(self, round):
         print(f"  Round {round.id} - start time: {round.start_time}")
         print(f"  Number of players: {round.number_of_players}")
 
-        hands = self._session.query(db.Hand).filter_by(round_id=round.id).order_by(db.Hand.participant.spot).all()
+        hands = self._session.query(db.Hand).filter_by(round_id=round.id).all()
         for hand in hands:
             self.replay_hand(hand)
             print("")
@@ -63,12 +63,13 @@ class Replay():
         print(f"    {player.role} {player.name} bets {hand.bet} on hand {hand.id}")
         if hand.is_blackjack:
             print(f"    Hand is a Blackjack!")
+        print(f"    -- Hand starting value: {hand.start_value}")
 
         hand_elements = self._session.query(db.HandElement).filter_by(hand_id=hand.id).all()
         for element in hand_elements:
             self.replay_hand_element(element)
 
-        print(f"    -- Hand total: {hand.total}")
+        print(f"    -- Hand final value: {hand.final_value}")
         print(f"    -- Hand result is {hand.result.name}")
 
     def replay_hand_element(self, element):

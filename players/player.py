@@ -27,7 +27,6 @@ class Player():
             role - The players role. This can be 'Player' or 'Dealer'.
         """
         self._session = session
-        print(f"Session is {self._session}")
         self._db_info = self._session.query(db.Player).filter_by(name=name).one()
         print(f"From DB: {self._db_info.role} {self._db_info.name} has {self._db_info.bankroll} in bankroll")
         self._bankroll = Bankroll(self._db_info.bankroll)
