@@ -223,7 +223,7 @@ class Blackjack():
                 action = 'hit'
                 while action == 'hit' and player.hand:
                     #action = click.prompt(f'{player}, your turn', default='stand')
-                    action = 'stand'
+                    action = player.strategy.decision(hand=player.hand, upcard=self.dealer.hand[0].rank)
                     player.move(action, shoe)
                     if player.hand.value > 21:
                         player.hand.db_info.result_id = self._results['bust']
@@ -239,7 +239,7 @@ class Blackjack():
             if player.hand is None:
                 self.losses[player] += 1
             elif player.hand.is_blackjack:
-                player.hand.db_info.result_id = self._results['blackjack']
+                player.hand.db_info.result_id = self._results['win']
                 player.hand.db_info.final_value = player.hand.value
                 self._logger.info(f"*** {player} wins ${player.hand.bet.amount} with a Natural! ***")
                 player.bankroll.invest(player.hand.bet.amount * 2.5)
@@ -274,7 +274,7 @@ class Blackjack():
         for player in self.players:
             self._logger.info(f"{player}'s bankroll is ${player.bankroll.amount}")
             #bet_amount = click.prompt(f'{player}, please place bet', default=25)
-            bet_amount = 100
+            bet_amount = 5
             player.place_bet(bet_amount)
 
     def _init_logger(self, console_log_level=None, file_log_level=None):

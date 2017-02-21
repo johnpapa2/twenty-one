@@ -29,7 +29,7 @@ def play_game(players, matches, console, file):
         shoe = bj.shoe
         shoe.shuffle()
         bj.burn_a_card()
-        while len(shoe) > 3 * (len(bj.players) + 1):
+        while len(shoe) > 4 * (len(bj.players) + 1):
             bj.play_round()
         for player in bj.players:
             logger.info("\n\n***** shoe summary *****")

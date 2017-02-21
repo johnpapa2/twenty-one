@@ -49,6 +49,7 @@ class Replay():
     def replay_round(self, round):
         print(f"  Round {round.id} - start time: {round.start_time}")
         print(f"  Number of players: {round.number_of_players}")
+        print(f"  -- Dealer shows a {round.dealer_up_card.name}")
 
         hands = self._session.query(db.Hand).filter_by(round_id=round.id).all()
         for hand in hands:
@@ -62,18 +63,41 @@ class Replay():
         player = hand.participant.player
         print(f"    {player.role} {player.name} bets {hand.bet} on hand {hand.id}")
         if hand.is_blackjack:
-            print(f"    Hand is a Blackjack!")
-        print(f"    -- Hand starting value: {hand.start_value}")
+            print(f"      Hand is a Blackjack!")
+        print(f"      -- Hand starting value: {hand.start_value}")
 
         hand_elements = self._session.query(db.HandElement).filter_by(hand_id=hand.id).all()
         for element in hand_elements:
             self.replay_hand_element(element)
 
-        print(f"    -- Hand final value: {hand.final_value}")
-        print(f"    -- Hand result is {hand.result.name}")
+        print(f"      -- Hand final value: {hand.final_value}")
+        print(f"      -- Hand result is {hand.result.name}")
 
     def replay_hand_element(self, element):
-        print(f"    Action {element.action.name} - Card is {element.card.name}")
+        print(f"        Action {element.action.name} - Card is {element.card.name}")
+
+    def replay_starting_hand(self, total, upcard=None):
+        hands = self._session.query(db.Hand).filter_by(start_value=total, is_player=True).all()
+        for hand in hands:
+            round = self._session.query(db.Round).filter_by(id=hand.round.id).one()
+            self.replay_round(round)
+            print("\n")
+
+    def win_loss(self, final_total=None, start_total=None, upcard=None):
+        if start_total:
+            print(f"Results for starting totals of {start_total}:")
+            hands = self._session.query(db.Hand).filter_by(start_value=start_total, is_player=True).all()
+        if final_total:
+            print(f"Results for final totals of {final_total}:")
+            hands = self._session.query(db.Hand).filter_by(final_value=final_total, is_player=True).all()
+        results = {result.name: 0 for result in self._session.query(db.Result).all()}
+        for hand in hands:
+            results[hand.result.name] += 1
+
+        number_of_hands = sum([number for result, number in results.items()])
+        print(f"  Wins:   {results['win']} - {(results['win'] / number_of_hands):.2%}")
+        print(f"  Losses: {results['lose']} - {(results['lose'] / number_of_hands):.2%}")
+        print(f"  Pushes: {results['push']} - {(results['push'] / number_of_hands):.2%}")
 
 if __name__ == '__main__':
     replay = Replay()

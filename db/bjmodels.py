@@ -100,6 +100,7 @@ class Hand(DeclarativeBase):
     id = Column(Integer, primary_key=True)
     bet = Column(Integer)
     is_blackjack = Column(Boolean)
+    is_player = Column(Boolean)
     final_value = Column(Integer)
     start_value = Column(Integer)
     participant_id = Column(Integer, ForeignKey('participant.id'))

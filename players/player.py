@@ -11,6 +11,7 @@ import logging
 
 from .bankroll import Bankroll
 from .bjhand import BjHand
+from .strategy import Strategy
 
 
 class Player():
@@ -28,12 +29,14 @@ class Player():
         """
         self._session = session
         self._db_info = self._session.query(db.Player).filter_by(name=name).one()
-        print(f"From DB: {self._db_info.role} {self._db_info.name} has {self._db_info.bankroll} in bankroll")
+        if role == 'Player':
+            print(f"From DB: {self._db_info.role} {self._db_info.name} has {self._db_info.bankroll} in bankroll")
         self._bankroll = Bankroll(self._db_info.bankroll)
         self._hand = None
         self._name = self._db_info.name
         self._participant_id = None
         self._role = self._db_info.role
+        self._strategy = Strategy(self._session)
         self._logger = logging.getLogger('bj')
         if role == 'Dealer':
             self._logger.info(f"{self} taps into table")
@@ -93,6 +96,11 @@ class Player():
     def role(self):
         """ Returns the player's role """
         return self._role
+
+    @property
+    def strategy(self):
+        """ Returns the player's strategy """
+        return self._strategy
 
     def discard_hand(self):
         """ Returns all the cards from the player's hand so they can be added to the discard pile """
@@ -170,6 +178,11 @@ class Player():
         self._hand = BjHand(self._session, bet)
         if self.role == 'Player':
             self._logger.info(f"{self} bets ${bet} dollars.")
+            is_player = True
+        else:
+            is_player = False
+        self.hand.db_info.is_player = is_player
+        self._session.commit()
 
     def receives(self, action, card):
         """ Adds a card to the player's hand
